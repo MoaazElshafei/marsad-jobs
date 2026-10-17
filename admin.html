@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة التحكم الإدارية | مرصد الوظائف</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style> body { font-family: 'Cairo', sans-serif; } </style>
+</head>
+<body class="bg-slate-100 text-slate-900 min-h-screen">
+
+  <!-- صفحة تسجيل الدخول -->
+  <div id="login-screen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-50 p-4">
+    <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-md w-full text-center space-y-6">
+      <div class="bg-emerald-500 text-slate-950 font-black w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-2xl shadow">
+        لوحة
+      </div>
+      <div>
+        <h2 class="text-2xl font-black text-slate-900">تسجيل دخول المشرف</h2>
+        <p class="text-xs text-slate-500 mt-1">أدخل كلمة المرور للوصول إلى لوحة تحكم مرصد الوظائف</p>
+      </div>
+      <input
+        id="admin-pass"
+        type="password"
+        placeholder="كلمة المرور الإدارية..."
+        class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:border-emerald-500 text-center text-lg"
+      />
+      <button
+        onclick="checkLogin()"
+        class="w-full bg-slate-900 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl transition shadow"
+      >
+        دخول لوحة التحكم
+      </button>
+      <p id="login-error" class="text-xs text-red-500 font-bold hidden">كلمة المرور غير صحيحة!</p>
+    </div>
+  </div>
+
+  <!-- لوحة التحكم الرئيسية -->
+  <div id="admin-dashboard" class="hidden min-h-screen flex flex-col">
+    <header class="bg-slate-900 text-white shadow p-4">
+      <div class="max-w-7xl mx-auto flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="bg-emerald-500 text-slate-950 font-black px-3 py-1 rounded-lg">إدارة مرصد</span>
+          <h1 class="text-lg font-bold">لوحة التحكم والتحليلات</h1>
+        </div>
+        <a href="index.html" target="_blank" class="text-xs bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-xl transition">
+          عرض الموقع العام ↗
+        </a>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8 flex-1 space-y-8 w-full">
+      
+      <!-- إحصائيات عامة -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <p class="text-xs font-bold text-slate-400">إجمالي الوظائف الحالية</p>
+          <h3 id="stat-total" class="text-3xl font-black text-slate-900 mt-2">0</h3>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <p class="text-xs font-bold text-slate-400">وظائف مصر (EG)</p>
+          <h3 id="stat-egypt" class="text-3xl font-black text-emerald-600 mt-2">0</h3>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <p class="text-xs font-bold text-slate-400">التخصصات النشطة</p>
+          <h3 id="stat-cats" class="text-3xl font-black text-blue-600 mt-2">0</h3>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <p class="text-xs font-bold text-slate-400">المصادر المتاحة</p>
+          <h3 id="stat-sources" class="text-3xl font-black text-purple-600 mt-2">0</h3>
+        </div>
+      </div>
+
+      <!-- إضافة وظيفة يدوياً -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <h3 class="text-lg font-black text-slate-900 mb-4">➕ إضافة وظيفة جديدة يدوياً</h3>
+        <form id="add-job-form" onsubmit="addManualJob(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <input required id="m-title" type="text" placeholder="المسمى الوظيفي..." class="px-4 py-2.5 border rounded-xl text-sm" />
+          <input required id="m-company" type="text" placeholder="اسم الشركة..." class="px-4 py-2.5 border rounded-xl text-sm" />
+          <input required id="m-location" type="text" placeholder="المدينة / الدولة (مثال: القاهرة / مصر)..." class="px-4 py-2.5 border rounded-xl text-sm" />
+          
+          <select id="m-category" class="px-4 py-2.5 border rounded-xl text-sm bg-white">
+            <option value="مبيعات وعقارات">مبيعات وعقارات</option>
+            <option value="تكنولوجيا ومعلومات">تكنولوجيا ومعلومات</option>
+            <option value="محاسبة ومالية">محاسبة ومالية</option>
+            <option value="هندسة وإنشاءات">هندسة وإنشاءات</option>
+            <option value="تسويق وصناعة محتوى">تسويق وصناعة محتوى</option>
+            <option value="إدارة وخدمة عملاء">إدارة وخدمة عملاء</option>
+            <option value="وظائف متنوعة">وظائف متنوعة</option>
+          </select>
+
+          <select id="m-type" class="px-4 py-2.5 border rounded-xl text-sm bg-white">
+            <option value="دوام كامل">دوام كامل</option>
+            <option value="عن بُعد">عن بُعد (Remote)</option>
+            <option value="هجين">هجين (Hybrid)</option>
+          </select>
+
+          <input required id="m-url" type="url" placeholder="رابط التقديم المباشر (URL)..." class="px-4 py-2.5 border rounded-xl text-sm" />
+          
+          <textarea id="m-desc" placeholder="وصف موجز عن الوظيفة..." class="md:col-span-3 px-4 py-2.5 border rounded-xl text-sm h-20"></textarea>
+          
+          <button type="submit" class="md:col-span-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition">
+            نشر الوظيفة على الموقع فوراً
+          </button>
+        </form>
+      </div>
+
+      <!-- قائمة وحذف الوظائف -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <h3 class="text-lg font-black text-slate-900 mb-4">📋 إدارة وحذف الوظائف المسجلة</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-right border-collapse">
+            <thead>
+              <tr class="border-b text-xs text-slate-400">
+                <th class="py-3 px-2">المسمى الوظيفي</th>
+                <th class="py-3 px-2">الشركة</th>
+                <th class="py-3 px-2">البلد / الموقع</th>
+                <th class="py-3 px-2">التخصص</th>
+                <th class="py-3 px-2">المصدر</th>
+                <th class="py-3 px-2 text-center">الإجراء</th>
+              </tr>
+            </thead>
+            <tbody id="jobs-table-body" class="text-sm divide-y">
+              <!-- يتم تعبئتها برمجياً -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    // ==========================================
+    // إعدادات الربط وكلمة المرور
+    // ==========================================
+    const SUPABASE_URL = 'https://hsomjtpoqmtymuvzymik.supabase.co';
+    const SUPABASE_ANON_KEY = 'PUT_YOUR_ANON_KEY_HERE'; // ضع مفتاح anon هنا
+    const ADMIN_PASSWORD = 'admin123'; // ⚠️ غير كلمة المرور إلى ما تشاء
+
+    const supabaseAdmin = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+sb_publishable_MJC4wJAIVMs1O-c0H89qag_ivW0BoUm
+    function checkLogin() {
+      const pass = document.getElementById('admin-pass').value;
+      if (pass === ADMIN_PASSWORD) {
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('admin-dashboard').classList.remove('hidden');
+        loadAdminData();
+      } else {
+        document.getElementById('login-error').classList.remove('hidden');
+      }
+    }
+
+    async function loadAdminData() {
+      const { data: jobs, error } = await supabaseAdmin
+        .from('jobs')
+        .select('*')
+        .order('published_at', { ascending: false });
+
+      if (error) {
+        alert('خطأ في جلب البيانات من قاعدة البيانات');
+        return;
+      }
+
+      // حساب الإحصائيات
+      document.getElementById('stat-total').textContent = jobs.length;
+      document.getElementById('stat-egypt').textContent = jobs.filter(j => j.country_code === 'EG').length;
+      
+      const uniqueCats = new Set(jobs.map(j => j.category));
+      document.getElementById('stat-cats').textContent = uniqueCats.size;
+
+      const uniqueSources = new Set(jobs.map(j => j.source));
+      document.getElementById('stat-sources').textContent = uniqueSources.size;
+
+      // تعبئة الجدول
+      const tbody = document.getElementById('jobs-table-body');
+      tbody.innerHTML = jobs.map(job => `
+        <tr class="hover:bg-slate-50">
+          <td class="py-3 px-2 font-bold text-slate-800">${job.title}</td>
+          <td class="py-3 px-2 text-slate-600">${job.company}</td>
+          <td class="py-3 px-2 text-slate-500">${job.location}</td>
+          <td class="py-3 px-2"><span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded text-xs">${job.category}</span></td>
+          <td class="py-3 px-2 text-xs text-slate-400">${job.source}</td>
+          <td class="py-3 px-2 text-center">
+            <button onclick="deleteJob('${job.id}')" class="bg-red-100 hover:bg-red-600 hover:text-white text-red-600 px-3 py-1.5 rounded-lg text-xs transition font-bold">
+              حذف
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function addManualJob(e) {
+      e.preventDefault();
+      const newJob = {
+        external_id: `manual_${Date.now()}`,
+        title: document.getElementById('m-title').value,
+        company: document.getElementById('m-company').value,
+        location: document.getElementById('m-location').value,
+        country_code: 'EG',
+        category: document.getElementById('m-category').value,
+        job_type: document.getElementById('m-type').value,
+        description: document.getElementById('m-desc').value,
+        apply_url: document.getElementById('m-url').value,
+        source: 'إضافة يدوية (Admin)',
+        published_at: new Date().toISOString()
+      };
+
+      const { error } = await supabaseAdmin.from('jobs').insert([newJob]);
+      if (error) {
+        alert('حدث خطأ أثناء النشر: ' + error.message);
+      } else {
+        alert('تمت إضافة الوظيفة بنجاح وتحديث الموقع!');
+        document.getElementById('add-job-form').reset();
+        loadAdminData();
+      }
+    }
+
+    async function deleteJob(id) {
+      if (confirm('هل أنت متأكد من حذف هذه الوظيفة نهائياً من الموقع؟')) {
+        const { error } = await supabaseAdmin.from('jobs').delete().eq('id', id);
+        if (error) {
+          alert('خطأ أثناء الحذف: ' + error.message);
+        } else {
+          loadAdminData();
+        }
+      }
+    }
+  </script>
+</body>
+</html>
