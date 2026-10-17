@@ -22,7 +22,6 @@ jobs:
 
       - name: Run Fetcher Script
         env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          JOOBLE_API_KEY: ${{ secrets.JOOBLE_API_KEY }}
+          RAPID_API_KEY: ${{ secrets.RAPID_API_KEY }}
         run: node scripts/fetch-jobs.mjs
