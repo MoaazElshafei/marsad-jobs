@@ -8,29 +8,28 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 function detectCategory(title) {
   const t = (title || '').toLowerCase();
-  if (t.includes('sales') || t.includes('مبيعات') || t.includes('عقارات') || t.includes('real estate') || t.includes('account manager') || t.includes('business development')) return 'مبيعات وعقارات';
-  if (t.includes('developer') || t.includes('software') || t.includes('engineer') || t.includes('برمجة') || t.includes('it') || t.includes('sap') || t.includes('data') || t.includes('frontend') || t.includes('backend') || t.includes('full stack')) return 'تكنولوجيا ومعلومات';
-  if (t.includes('accountant') || t.includes('محاسب') || t.includes('finance') || t.includes('مالي') || t.includes('payroll')) return 'محاسبة ومالية';
-  if (t.includes('civil') || t.includes('architect') || t.includes('مدني') || t.includes('معماري') || t.includes('construction') || t.includes('mechanical')) return 'هندسة وإنشاءات';
-  if (t.includes('marketing') || t.includes('تسويق') || t.includes('social media') || t.includes('content') || t.includes('seo') || t.includes('copywriter') || t.includes('video') || t.includes('design')) return 'تسويق وصناعة محتوى';
-  if (t.includes('hr') || t.includes('موارد بشرية') || t.includes('admin') || t.includes('إداري') || t.includes('support') || t.includes('customer') || t.includes('خدمة عملاء') || t.includes('recruiter')) return 'إدارة وخدمة عملاء';
+  if (t.includes('sales') || t.includes('مبيعات') || t.includes('عقارات') || t.includes('real estate')) return 'مبيعات وعقارات';
+  if (t.includes('developer') || t.includes('software') || t.includes('engineer') || t.includes('برمجة') || t.includes('it') || t.includes('data')) return 'تكنولوجيا ومعلومات';
+  if (t.includes('accountant') || t.includes('محاسب') || t.includes('finance') || t.includes('مالي')) return 'محاسبة ومالية';
+  if (t.includes('civil') || t.includes('architect') || t.includes('مدني') || t.includes('معماري')) return 'هندسة وإنشاءات';
+  if (t.includes('marketing') || t.includes('تسويق') || t.includes('social media')) return 'تسويق وصناعة محتوى';
+  if (t.includes('hr') || t.includes('موارد بشرية') || t.includes('admin') || t.includes('إداري') || t.includes('خدمة عملاء')) return 'إدارة وخدمة عملاء';
   return 'وظائف متنوعة';
 }
 
 async function fetchJSearchJobs() {
   if (!rapidApiKey) {
-    console.error('❌ خطأ: مفتاح RAPID_API_KEY غير موجود في Secrets!');
+    console.error('❌ مفتاح RAPID_API_KEY مفقود!');
     return [];
   }
 
-  const queries = ['jobs in Egypt', 'Cairo jobs', 'مبيعات مصر'];
-  let allMappedJobs = [];
+  // كلمات بحث تركز مباشرة على فرص العمل داخل مصر
+  const queries = ['Cairo', 'Alexandria', 'Egypt'];
+  let allJobs = [];
 
-  for (const query of queries) {
+  for (const q of queries) {
     try {
-      const url = `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(query)}&page=1&num_pages=1`;
-      console.log(`🔍 جاري البحث عن: ${query}`);
-      
+      const url = `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(q)}&page=1&num_pages=1`;
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -38,9 +37,7 @@ async function fetchJSearchJobs() {
           'X-RapidAPI-Host': 'jsearch.p.rapidapi.com'
         }
       });
-      
       const data = await response.json();
-      console.log(`📥 استجابة API لـ ${query}:`, data?.data ? `${data.data.length} وظيفة` : 'لا توجد بيانات');
 
       if (data && data.data) {
         const mapped = data.data.map(job => ({
@@ -56,33 +53,28 @@ async function fetchJSearchJobs() {
           source: 'JSearch Egypt',
           published_at: job.job_posted_at_datetime_utc ? new Date(job.job_posted_at_datetime_utc).toISOString() : new Date().toISOString()
         }));
-        allMappedJobs.push(...mapped);
+        allJobs.push(...mapped);
       }
     } catch (err) {
-      console.error(`❌ خطأ في جلب ${query}:`, err.message);
+      console.error('API Error:', err.message);
     }
   }
 
-  return allMappedJobs;
+  return allJobs;
 }
 
 async function run() {
-  console.log('🇪🇬 بدء سحب وظائف مصر عبر JSearch API...');
+  console.log('🇪🇬 جاري سحب الوظائف عبر JSearch...');
   const jobs = await fetchJSearchJobs();
-  console.log(`📦 إجمالي الوظائف المجمعة: ${jobs.length}`);
+  console.log(`📦 تم جلب ${jobs.length} وظيفة.`);
 
   if (jobs.length > 0) {
     const { error } = await supabase
       .from('jobs')
       .upsert(jobs, { onConflict: 'external_id', ignoreDuplicates: true });
 
-    if (error) {
-      console.error('❌ خطأ في الحفظ بقاعدة البيانات:', error.message);
-    } else {
-      console.log('✅ تم حفظ الوظائف الجديدة بنجاح في Supabase!');
-    }
-  } else {
-    console.log('⚠️ لم يتم العثور على وظائف جديدة لإضافتها.');
+    if (error) console.error('Error saving:', error.message);
+    else console.log('✅ تم الحفظ بنجاح!');
   }
 }
 
