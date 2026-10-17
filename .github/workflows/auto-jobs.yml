@@ -17,11 +17,10 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Install Supabase
-        run: npm install @supabase/supabase-js
+      - name: Install Dependencies
+        run: npm install @supabase/supabase-js rss-parser
 
       - name: Run Fetcher Script
         env:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          RAPID_API_KEY: ${{ secrets.RAPID_API_KEY }}
         run: node scripts/fetch-jobs.mjs
