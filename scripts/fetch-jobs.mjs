@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = 'https://hsomjtpoqmtymuvzymik.supabase.co';
 const supabaseServiceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || '').replace(/^SUPABASE_SERVICE_ROLE_KEY=/, '').trim();
+const rapidApiKey = process.env.RAPID_API_KEY;
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
@@ -16,45 +17,59 @@ function detectCategory(title) {
   return 'وظائف متنوعة';
 }
 
-// دالة لجلب الوظائف التي تخص مصر فقط من مصادر متعددة
-async function fetchEgyptJobs() {
-  try {
-    // جلب الوظائف المتاحة وتصفيتها لتشمل مصر حصرياً
-    const res = await fetch('https://remotive.com/api/remote-jobs?limit=100');
-    const data = await res.json();
-    if (!data.jobs) return [];
-
-    const egyptJobs = data.jobs.filter(job => {
-      const loc = (job.candidate_required_location || '').toLowerCase();
-      const desc = (job.description || '').toLowerCase();
-      const title = (job.title || '').toLowerCase();
-      return loc.includes('egypt') || loc.includes('middle east') || loc.includes('anywhere') || 
-             desc.includes('egypt') || desc.includes('cairo') || title.includes('egypt');
-    });
-
-    return egyptJobs.map(job => ({
-      external_id: `bayt_egy_${job.id}`,
-      title: job.title,
-      company: job.company_name || 'شركة معتمدة في مصر',
-      location: 'مصر (القاهرة / المحافظات)',
-      country_code: 'EG',
-      category: detectCategory(job.title),
-      job_type: 'دوام كامل',
-      description: job.description ? job.description.replace(/<[^>]*>?/gm, '').slice(0, 240) + '...' : '',
-      apply_url: job.url,
-      source: 'Bayt / Egypt Feeds',
-      published_at: job.publication_date ? new Date(job.publication_date).toISOString() : new Date().toISOString()
-    }));
-  } catch (err) {
-    console.error('Error:', err.message);
+async function fetchJSearchJobs() {
+  if (!rapidApiKey) {
+    console.error('❌ خطأ: مفتاح RAPID_API_KEY غير موجود في Secrets!');
     return [];
   }
+
+  const queries = ['jobs in Egypt', 'Cairo jobs', 'مبيعات مصر'];
+  let allMappedJobs = [];
+
+  for (const query of queries) {
+    try {
+      const url = `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(query)}&page=1&num_pages=1`;
+      console.log(`🔍 جاري البحث عن: ${query}`);
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'X-RapidAPI-Key': rapidApiKey,
+          'X-RapidAPI-Host': 'jsearch.p.rapidapi.com'
+        }
+      });
+      
+      const data = await response.json();
+      console.log(`📥 استجابة API لـ ${query}:`, data?.data ? `${data.data.length} وظيفة` : 'لا توجد بيانات');
+
+      if (data && data.data) {
+        const mapped = data.data.map(job => ({
+          external_id: `jsearch_${job.job_id}`,
+          title: job.job_title || 'وظيفة في مصر',
+          company: job.employer_name || 'شركة معتمدة',
+          location: job.job_city ? `${job.job_city}, مصر` : 'مصر',
+          country_code: 'EG',
+          category: detectCategory(job.job_title),
+          job_type: job.job_employment_type ? job.job_employment_type.toLowerCase() : 'دوام كامل',
+          description: job.job_description ? job.job_description.slice(0, 240) + '...' : '',
+          apply_url: job.job_apply_link || job.job_google_link || 'https://google.com',
+          source: 'JSearch Egypt',
+          published_at: job.job_posted_at_datetime_utc ? new Date(job.job_posted_at_datetime_utc).toISOString() : new Date().toISOString()
+        }));
+        allMappedJobs.push(...mapped);
+      }
+    } catch (err) {
+      console.error(`❌ خطأ في جلب ${query}:`, err.message);
+    }
+  }
+
+  return allMappedJobs;
 }
 
 async function run() {
-  console.log('🇪🇬 جاري سحب الوظائف الموجهة لسوق مصر...');
-  const jobs = await fetchEgyptJobs();
-  console.log(`📦 تم العثور على ${jobs.length} وظيفة.`);
+  console.log('🇪🇬 بدء سحب وظائف مصر عبر JSearch API...');
+  const jobs = await fetchJSearchJobs();
+  console.log(`📦 إجمالي الوظائف المجمعة: ${jobs.length}`);
 
   if (jobs.length > 0) {
     const { error } = await supabase
@@ -62,10 +77,12 @@ async function run() {
       .upsert(jobs, { onConflict: 'external_id', ignoreDuplicates: true });
 
     if (error) {
-      console.error('❌ خطأ في الحفظ:', error.message);
+      console.error('❌ خطأ في الحفظ بقاعدة البيانات:', error.message);
     } else {
-      console.log('✅ تم حفظ وظائف مصر بنجاح!');
+      console.log('✅ تم حفظ الوظائف الجديدة بنجاح في Supabase!');
     }
+  } else {
+    console.log('⚠️ لم يتم العثور على وظائف جديدة لإضافتها.');
   }
 }
 
