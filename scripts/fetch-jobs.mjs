@@ -1,61 +1,74 @@
 import { createClient } from '@supabase/supabase-js';
-import RSSParser from 'rss-parser';
 
-const parser = new RSSParser();
 const supabaseUrl = 'https://hsomjtpoqmtymuvzymik.supabase.co';
 const supabaseServiceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || '').replace(/^SUPABASE_SERVICE_ROLE_KEY=/, '').trim();
+const rapidApiKey = process.env.RAPID_API_KEY;
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-function detectCategory(title) {
-  const t = (title || '').toLowerCase();
-  if (t.includes('sales') || t.includes('مبيعات') || t.includes('عقارات')) return 'مبيعات وعقارات';
-  if (t.includes('developer') || t.includes('software') || t.includes('برمجة') || t.includes('it') || t.includes('محاسب') || t.includes('accountant')) return 'محاسبة ومالية';
-  if (t.includes('engineer') || t.includes('مهندس') || t.includes('مدني') || t.includes('معماري')) return 'هندسة وإنشاءات';
-  if (t.includes('marketing') || t.includes('تسويق')) return 'تسويق وصناعة محتوى';
-  if (t.includes('hr') || t.includes('موارد بشرية') || t.includes('إداري') || t.includes('خدمة عملاء')) return 'إدارة وخدمة عملاء';
-  return 'وظائف متنوعة';
-}
-
-async function fetchJobsFromRSS() {
-  try {
-    // ⚠️ الصق رابط الـ RSS الخاص بك هنا بين علامتي التنصيص
-    const rssUrl = 'ضع_رابط_الـ_RSS_الخاص_بك_هنا';
-    
-    const feed = await parser.parseURL(rssUrl);
-    if (!feed.items || feed.items.length === 0) return [];
-
-    return feed.items.map(item => ({
-      external_id: `rss_${item.guid || item.link}`,
-      title: item.title || 'وظيفة في مصر',
-      company: item.creator || 'شركة مصرية',
-      location: 'مصر (القاهرة / المحافظات)',
-      country_code: 'EG',
-      category: detectCategory(item.title),
-      job_type: 'دوام كامل',
-      description: item.contentSnippet ? item.contentSnippet.slice(0, 240) + '...' : 'فرصة عمل جديدة في مصر',
-      apply_url: item.link,
-      source: 'وظائف العرب (RSS)',
-      published_at: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString()
-    }));
-  } catch (err) {
-    console.error('RSS Parsing Error:', err.message);
-    return [];
-  }
-}
-
 async function run() {
-  console.log('🇪🇬 بدء سحب الوظائف المصرية عبر RSS...');
-  const jobs = await fetchJobsFromRSS();
-  console.log(`📦 تم جلب ${jobs.length} وظيفة مصرية.`);
+  console.log('🇪🇬 بدء فحص وتشخيص سحب الوظائف من JSearch API...');
 
-  if (jobs.length > 0) {
-    const { error } = await supabase
-      .from('jobs')
-      .upsert(jobs, { onConflict: 'external_id', ignoreDuplicates: true });
+  if (!rapidApiKey) {
+    console.error('❌ خطأ: مفتاح RAPID_API_KEY غير موجود في الـ Secrets!');
+    return;
+  }
 
-    if (error) console.error('Error saving to DB:', error.message);
-    else console.log('✅ تم حفظ الوظائف المصرية بنجاح في قاعدة البيانات!');
+  // سنقوم بتجربة استعلام بسيط وواضح
+  const query = 'developer Egypt';
+  const url = `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(query)}&page=1&num_pages=1`;
+
+  console.log(`🔍 جاري إرسال الطلب إلى الرابط: ${url}`);
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'X-RapidAPI-Key': rapidApiKey,
+        'X-RapidAPI-Host': 'jsearch.p.rapidapi.com'
+      }
+    });
+
+    const data = await response.json();
+    console.log('📥 الاستجابة الخام من الـ API (Raw Data):', JSON.stringify(data, null, 2));
+
+    if (data && data.data && data.data.length > 0) {
+      console.log(`✅ تم العثور على ${data.data.length} وظيفة بنجاح!`);
+      
+      // تجهيز أول وظيفة للتجربة
+      const job = data.data[0];
+      const mappedJob = {
+        external_id: `jsearch_test_${job.job_id || Date.now()}`,
+        title: job.job_title || 'وظيفة اختبارية',
+        company: job.employer_name || 'شركة اختبارية',
+        location: 'مصر',
+        country_code: 'EG',
+        category: 'تكنولوجيا ومعلومات',
+        job_type: 'دوام كامل',
+        description: (job.job_description || 'لا توجد تفاصيل').slice(0, 200),
+        apply_url: job.job_apply_link || 'https://google.com',
+        source: 'JSearch Test',
+        published_at: new Date().toISOString()
+      };
+
+      console.log('📦 محاولة حفظ الوظيفة في Supabase:', mappedJob);
+
+      const { error } = await supabase
+        .from('jobs')
+        .upsert([mappedJob], { onConflict: 'external_id' });
+
+      if (error) {
+        console.error('❌ فشل الحفظ في Supabase:', error.message);
+      } else {
+        console.log('🎉 تم حفظ الوظيفة التجريبية في قاعدة البيانات بنجاح تام!');
+      }
+
+    } else {
+      console.log('⚠️ الـ API لم يرجع أي نتائج لهذا الاستعلام. قد يكون المفتاح بحاجة لتفعيل أو استهلاك الحد المجاني.');
+    }
+
+  } catch (err) {
+    console.error('❌ حدث خطأ أثناء الاتصال بالـ API:', err.message);
   }
 }
 
