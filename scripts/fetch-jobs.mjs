@@ -1,7 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// رابط مشروعك مباشر ومضمون 100% بدون أي أخطاء قراءة
+const supabaseUrl = 'https://hsomjtpoqmtymuvzymik.supabase.co';
+const supabaseServiceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || '').replace(/^SUPABASE_SERVICE_ROLE_KEY=/, '').trim();
+
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 function detectCategory(title) {
@@ -65,53 +67,14 @@ async function fetchArbeitnowJobs() {
   }
 }
 
-async function fetchJoobleJobs() {
-  const apiKey = process.env.JOOBLE_API_KEY;
-  if (!apiKey) return [];
-
-  const queries = ['Egypt', 'Cairo', 'Alexandria', 'Sales Egypt', 'Accountant Egypt'];
-  let results = [];
-
-  for (const q of queries) {
-    try {
-      const response = await fetch(`https://jooble.org/api/${apiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ keywords: q, location: 'Egypt', page: 1 })
-      });
-      const data = await response.json();
-      if (data.jobs) {
-        const mapped = data.jobs.map(job => ({
-          external_id: `jooble_${job.id}`,
-          title: job.title.replace(/<[^>]*>?/gm, ''),
-          company: job.company || 'شركة في مصر',
-          location: job.location || 'مصر',
-          country_code: 'EG',
-          category: detectCategory(job.title),
-          job_type: job.type || 'دوام كامل',
-          description: job.snippet ? job.snippet.replace(/<[^>]*>?/gm, '') : '',
-          apply_url: job.link,
-          source: 'Jooble Egypt',
-          published_at: new Date().toISOString()
-        }));
-        results.push(...mapped);
-      }
-    } catch (err) {
-      console.error('Jooble Error:', err.message);
-    }
-  }
-  return results;
-}
-
 async function run() {
   console.log('🚀 بدء جلب الوظائف لمنصة مرصد الوظائف...');
-  const [remotive, arbeitnow, jooble] = await Promise.all([
+  const [remotive, arbeitnow] = await Promise.all([
     fetchRemotiveJobs(),
-    fetchArbeitnowJobs(),
-    fetchJoobleJobs()
+    fetchArbeitnowJobs()
   ]);
 
-  const allJobs = [...jooble, ...remotive, ...arbeitnow];
+  const allJobs = [...remotive, ...arbeitnow];
   console.log(`📦 تم العثور على ${allJobs.length} وظيفة جاهزة للحفظ.`);
 
   if (allJobs.length > 0) {
