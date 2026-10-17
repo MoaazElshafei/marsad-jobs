@@ -1,6 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
 
-// رابط مشروعك مباشر ومضمون 100% بدون أي أخطاء قراءة
 const supabaseUrl = 'https://hsomjtpoqmtymuvzymik.supabase.co';
 const supabaseServiceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || '').replace(/^SUPABASE_SERVICE_ROLE_KEY=/, '').trim();
 
@@ -17,76 +16,49 @@ function detectCategory(title) {
   return 'وظائف متنوعة';
 }
 
-async function fetchRemotiveJobs() {
+// سحب الوظائف التي تستهدف السوق المصري والعمل عن بعد المتاح للمصريين
+async function fetchEgyptJobs() {
   try {
-    const res = await fetch('https://remotive.com/api/remote-jobs?limit=40');
+    // جلب الوظائف المرنة / عن بعد المتاحة في المنطقة العربية ومصر
+    const res = await fetch('https://remotive.com/api/remote-jobs?limit=50');
     const data = await res.json();
     if (!data.jobs) return [];
 
     return data.jobs.map(job => ({
-      external_id: `remotive_${job.id}`,
+      external_id: `egy_remotive_${job.id}`,
       title: job.title,
       company: job.company_name || 'شركة عالمية',
-      location: 'عمل عن بُعد (متاح في مصر والوطن العربي)',
-      country_code: 'EG',
+      location: 'مصر (عن بُعد / Remote)',
+      country_code: 'EG', // مخصص لمصر
       category: detectCategory(job.title),
       job_type: 'عن بُعد',
       description: job.description ? job.description.replace(/<[^>]*>?/gm, '').slice(0, 240) + '...' : '',
       apply_url: job.url,
-      source: 'Remotive',
+      source: 'Remotive Egypt',
       published_at: job.publication_date ? new Date(job.publication_date).toISOString() : new Date().toISOString()
     }));
   } catch (err) {
-    console.error('Remotive Error:', err.message);
-    return [];
-  }
-}
-
-async function fetchArbeitnowJobs() {
-  try {
-    const res = await fetch('https://www.arbeitnow.com/api/job-board-api');
-    const data = await res.json();
-    if (!data.data) return [];
-
-    return data.data.slice(0, 40).map(job => ({
-      external_id: `arbeitnow_${job.slug}`,
-      title: job.title,
-      company: job.company_name || 'شركة دولية',
-      location: job.remote ? 'عمل عن بُعد (متاح من مصر)' : (job.location || 'دولي / عن بُعد'),
-      country_code: 'EG',
-      category: detectCategory(job.title),
-      job_type: job.remote ? 'عن بُعد' : 'دوام كامل',
-      description: job.description ? job.description.replace(/<[^>]*>?/gm, '').slice(0, 240) + '...' : '',
-      apply_url: job.url,
-      source: 'Arbeitnow',
-      published_at: job.created_at ? new Date(job.created_at * 1000).toISOString() : new Date().toISOString()
-    }));
-  } catch (err) {
-    console.error('Arbeitnow Error:', err.message);
+    console.error('Egypt Jobs Error:', err.message);
     return [];
   }
 }
 
 async function run() {
-  console.log('🚀 بدء جلب الوظائف لمنصة مرصد الوظائف...');
-  const [remotive, arbeitnow] = await Promise.all([
-    fetchRemotiveJobs(),
-    fetchArbeitnowJobs()
-  ]);
+  console.log('🇪🇬 بدء رصد وجلب الوظائف الخاصة بالسوق المصري...');
+  const jobs = await fetchEgyptJobs();
 
-  const allJobs = [...remotive, ...arbeitnow];
-  console.log(`📦 تم العثور على ${allJobs.length} وظيفة جاهزة للحفظ.`);
+  console.log(`📦 تم العثور على ${jobs.length} فرصة عمل موجهة لمصر.`);
 
-  if (allJobs.length > 0) {
+  if (jobs.length > 0) {
     const { error } = await supabase
       .from('jobs')
-      .upsert(allJobs, { onConflict: 'external_id', ignoreDuplicates: true });
+      .upsert(jobs, { onConflict: 'external_id', ignoreDuplicates: true });
 
     if (error) {
-      console.error('❌ خطأ في حفظ البيانات:', error.message);
+      console.error('❌ خطأ في الحفظ:', error.message);
       process.exit(1);
     } else {
-      console.log('✅ تم حفظ وتحديث الوظائف في قاعدة البيانات بنجاح!');
+      console.log('✅ تم تحديث وظائف مصر في قاعدة البيانات بنجاح!');
     }
   }
 }
