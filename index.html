@@ -22,24 +22,20 @@
         </span>
         <div>
           <h1 class="text-xl font-bold tracking-wide">مرصد الوظائف | MarsadJobs</h1>
-          <p class="text-xs text-slate-400">رصد آلي لحظي لوظائف مصر والوطن العربي على مدار الساعة</p>
+          <p class="text-xs text-slate-400">رصد آلي لحظي لوظائف مصر على مدار الساعة</p>
         </div>
       </div>
 
-      <!-- أزرار الدول -->
-      <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0" id="country-buttons">
-        <button onclick="selectCountry('EG')" data-country="EG" class="country-btn bg-emerald-500 text-slate-950 font-bold px-3.5 py-1.5 rounded-full text-sm flex items-center gap-1.5 shadow transition">
-          <span>🇪🇬</span><span>مصر</span>
-        </button>
-        <button onclick="selectCountry('SA')" data-country="SA" class="country-btn bg-slate-800 text-slate-200 hover:bg-slate-700 px-3.5 py-1.5 rounded-full text-sm flex items-center gap-1.5 transition">
-          <span>🇸🇦</span><span>السعودية</span>
-        </button>
-        <button onclick="selectCountry('AE')" data-country="AE" class="country-btn bg-slate-800 text-slate-200 hover:bg-slate-700 px-3.5 py-1.5 rounded-full text-sm flex items-center gap-1.5 transition">
-          <span>🇦🇪</span><span>الإمارات</span>
-        </button>
-        <button disabled class="bg-slate-800/40 text-slate-500 cursor-not-allowed px-3 py-1.5 rounded-full text-xs flex items-center gap-1">
-          <span>🇰🇼</span><span>الكويت (قريباً)</span>
-        </button>
+      <!-- زر لوحة التحكم السريع والدول -->
+      <div class="flex items-center gap-3">
+        <a href="admin.html" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs transition shadow flex items-center gap-1">
+          ⚙️ لوحة التحكم
+        </a>
+        <div class="flex items-center gap-2 overflow-x-auto" id="country-buttons">
+          <button onclick="selectCountry('EG')" data-country="EG" class="country-btn bg-emerald-500 text-slate-950 font-bold px-3.5 py-1.5 rounded-full text-sm flex items-center gap-1.5 shadow transition">
+            <span>🇪🇬</span><span>مصر</span>
+          </button>
+        </div>
       </div>
     </div>
   </header>
@@ -52,10 +48,10 @@
         يعمل بالرصد التلقائي الذكي دون وسطاء
       </div>
       <h2 class="text-2xl md:text-4xl font-extrabold leading-relaxed">
-        ابحث عن فرصتك القادمة في <span class="text-emerald-400">ثوانٍ معدودة</span>
+        ابحث عن فرصة عملك في مصر في <span class="text-emerald-400">ثوانٍ معدودة</span>
       </h2>
       <p class="text-slate-300 text-sm md:text-base max-w-2xl mx-auto">
-        يجمع مرصد الوظائف أحدث الفرص الوظيفية من كبرى المنصات والشركات العالمية والمحلية ويصنفها لك تلقائياً
+        يجمع مرصد الوظائف أحدث الفرص الوظيفية المتاحة في السوق المصري ويصنفها لك تلقائياً
       </p>
 
       <!-- شريط البحث والفلاتر -->
@@ -101,11 +97,8 @@
   </footer>
 
   <script>
-    // =========================================================================
-    // ضع مفتاح ANON_KEY الخاص بك في السطر التالي بين علامتي التنصيص
-    // =========================================================================
     const SUPABASE_URL = 'https://hsomjtpoqmtymuvzymik.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_MJC4wJAIVMs1O-c0H89qag_ivW0BoUm';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhzb21qdHBvcW10eW11dnp5bWlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTc2MTc2OTksImV4cCI6MjExMzE5MzY5OX0.hU8W8...'; // ضع مفتاح anon الصحيح هنا
 
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -148,13 +141,6 @@
 
     function selectCountry(code) {
       currentCountry = code;
-      document.querySelectorAll('.country-btn').forEach(btn => {
-        if (btn.getAttribute('data-country') === code) {
-          btn.className = 'country-btn bg-emerald-500 text-slate-950 font-bold px-3.5 py-1.5 rounded-full text-sm flex items-center gap-1.5 shadow transition';
-        } else {
-          btn.className = 'country-btn bg-slate-800 text-slate-200 hover:bg-slate-700 px-3.5 py-1.5 rounded-full text-sm flex items-center gap-1.5 transition';
-        }
-      });
       loadJobsFromDB();
     }
 
