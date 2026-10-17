@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مرصد الوظائف | MarsadJobs - وظائف مصر والوطن العربي</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Cairo', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+
+  <!-- الهيدر وشريط الدول -->
+  <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 shadow-md">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <span class="bg-emerald-500 text-slate-950 font-black px-3.5 py-1.5 rounded-xl text-xl shadow">
+          مرصد
+        </span>
+        <div>
+          <h1 class="text-xl font-bold tracking-wide">مرصد الوظائف | MarsadJobs</h1>
+          <p class="text-xs text-slate-400">رصد آلي لحظي لوظائف مصر والوطن العربي على مدار الساعة</p>
+        </div>
+      </div>
+
+      <!-- أزرار الدول -->
+      <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0" id="country-buttons">
+        <button onclick="selectCountry('EG')" data-country="EG" class="country-btn bg-emerald-500 text-slate-950 font-bold px-3.5 py-1.5 rounded-full text-sm flex items-center gap-1.5 shadow transition">
+          <span>🇪🇬</span><span>مصر</span>
+        </button>
+        <button onclick="selectCountry('SA')" data-country="SA" class="country-btn bg-slate-800 text-slate-200 hover:bg-slate-700 px-3.5 py-1.5 rounded-full text-sm flex items-center gap-1.5 transition">
+          <span>🇸🇦</span><span>السعودية</span>
+        </button>
+        <button onclick="selectCountry('AE')" data-country="AE" class="country-btn bg-slate-800 text-slate-200 hover:bg-slate-700 px-3.5 py-1.5 rounded-full text-sm flex items-center gap-1.5 transition">
+          <span>🇦🇪</span><span>الإمارات</span>
+        </button>
+        <button disabled class="bg-slate-800/40 text-slate-500 cursor-not-allowed px-3 py-1.5 rounded-full text-xs flex items-center gap-1">
+          <span>🇰🇼</span><span>الكويت (قريباً)</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- قسم البحث الرئيسي -->
+  <section class="bg-gradient-to-b from-slate-900 to-slate-800 text-white py-12 px-4 shadow-inner">
+    <div class="max-w-4xl mx-auto text-center space-y-5">
+      <div class="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-3 py-1 rounded-full text-xs font-semibold">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+        يعمل بالرصد التلقائي الذكي دون وسطاء
+      </div>
+      <h2 class="text-2xl md:text-4xl font-extrabold leading-relaxed">
+        ابحث عن فرصتك القادمة في <span class="text-emerald-400">ثوانٍ معدودة</span>
+      </h2>
+      <p class="text-slate-300 text-sm md:text-base max-w-2xl mx-auto">
+        يجمع مرصد الوظائف أحدث الفرص الوظيفية من كبرى المنصات والشركات العالمية والمحلية ويصنفها لك تلقائياً
+      </p>
+
+      <!-- شريط البحث والفلاتر -->
+      <div class="bg-white p-2 rounded-2xl shadow-xl flex flex-col md:flex-row gap-2 max-w-3xl mx-auto mt-6">
+        <input
+          id="search-input"
+          type="text"
+          oninput="filterJobs()"
+          placeholder="ابحث بالمسمى الوظيفي، التخصص، اسم الشركة، أو المدينة..."
+          class="flex-1 px-4 py-3 text-slate-800 rounded-xl focus:outline-none text-sm md:text-base"
+        />
+        <select
+          id="type-filter"
+          onchange="filterJobs()"
+          class="bg-slate-100 text-slate-700 px-4 py-3 rounded-xl font-semibold text-sm focus:outline-none cursor-pointer"
+        >
+          <option value="الكل">كل أنواع الدوام</option>
+          <option value="دوام كامل">دوام كامل</option>
+          <option value="عن بُعد">عمل عن بُعد (Remote)</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- المحتوى الرئيسي -->
+  <main class="max-w-6xl mx-auto px-4 py-8 flex-1 w-full">
+    <!-- شريط التصنيفات -->
+    <div id="category-bar" class="flex items-center gap-2 overflow-x-auto pb-4 mb-6 border-b border-slate-200"></div>
+
+    <!-- عداد الوظائف -->
+    <div class="flex items-center justify-between mb-4">
+      <p id="jobs-count" class="text-sm font-bold text-slate-600">جاري تحميل الوظائف المرصودة...</p>
+      <span class="text-xs text-slate-400">تحديث تلقائي كل 6 ساعات</span>
+    </div>
+
+    <!-- حاوية البطاقات -->
+    <div id="jobs-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+  </main>
+
+  <!-- الفوتر -->
+  <footer class="bg-slate-900 text-slate-400 text-center py-6 text-xs border-t border-slate-800 mt-12">
+    <p>© 2026 مرصد الوظائف (MarsadJobs) - جميع الحقوق محفوظة | يعمل بنظام الرصد التلقائي الذكي</p>
+  </footer>
+
+  <script>
+    // =========================================================================
+    // ضع مفتاح ANON_KEY الخاص بك في السطر التالي بين علامتي التنصيص
+    // =========================================================================
+    const SUPABASE_URL = 'https://hsomjtpoqmtymuvzymik.supabase.co';
+    const SUPABASE_ANON_KEY = 'https://hsomjtpoqmtymuvzymik.supabase.co';
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const CATEGORIES = [
+      'الكل',
+      'مبيعات وعقارات',
+      'تكنولوجيا ومعلومات',
+      'محاسبة ومالية',
+      'هندسة وإنشاءات',
+      'تسويق وصناعة محتوى',
+      'إدارة وخدمة عملاء',
+      'وظائف متنوعة'
+    ];
+
+    let allJobs = [];
+    let currentCountry = 'EG';
+    let currentCategory = 'الكل';
+
+    function renderCategories() {
+      const bar = document.getElementById('category-bar');
+      bar.innerHTML = CATEGORIES.map(cat => `
+        <button
+          onclick="selectCategory('${cat}')"
+          class="whitespace-nowrap px-4 py-2 rounded-xl text-sm font-bold transition ${
+            currentCategory === cat
+              ? 'bg-slate-900 text-white shadow'
+              : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+          }"
+        >
+          ${cat}
+        </button>
+      `).join('');
+    }
+
+    function selectCategory(cat) {
+      currentCategory = cat;
+      renderCategories();
+      filterJobs();
+    }
+
+    function selectCountry(code) {
+      currentCountry = code;
+      document.querySelectorAll('.country-btn').forEach(btn => {
+        if (btn.getAttribute('data-country') === code) {
+          btn.className = 'country-btn bg-emerald-500 text-slate-950 font-bold px-3.5 py-1.5 rounded-full text-sm flex items-center gap-1.5 shadow transition';
+        } else {
+          btn.className = 'country-btn bg-slate-800 text-slate-200 hover:bg-slate-700 px-3.5 py-1.5 rounded-full text-sm flex items-center gap-1.5 transition';
+        }
+      });
+      loadJobsFromDB();
+    }
+
+    async function loadJobsFromDB() {
+      const container = document.getElementById('jobs-container');
+      const countEl = document.getElementById('jobs-count');
+      container.innerHTML = '<div class="col-span-full text-center py-16 text-slate-500 font-bold">⏳ جاري رصد وتحميل أحدث الوظائف...</div>';
+
+      const { data, error } = await supabaseClient
+        .from('jobs')
+        .select('*')
+        .eq('country_code', currentCountry)
+        .order('published_at', { ascending: false })
+        .limit(120);
+
+      if (error) {
+        container.innerHTML = `<div class="col-span-full bg-red-50 text-red-700 p-6 rounded-2xl text-center font-bold">تأكد من وضع مفتاح ANON_KEY الصحيح داخل ملف index.html</div>`;
+        countEl.textContent = 'خطأ في الاتصال';
+        return;
+      }
+
+      allJobs = data || [];
+      filterJobs();
+    }
+
+    function filterJobs() {
+      const query = document.getElementById('search-input').value.toLowerCase();
+      const typeFilter = document.getElementById('type-filter').value;
+      const container = document.getElementById('jobs-container');
+      const countEl = document.getElementById('jobs-count');
+
+      const filtered = allJobs.filter(job => {
+        const matchCat = currentCategory === 'الكل' || job.category === currentCategory;
+        const matchType = typeFilter === 'الكل' || (job.job_type && job.job_type.includes(typeFilter));
+        const matchSearch =
+          (job.title || '').toLowerCase().includes(query) ||
+          (job.company || '').toLowerCase().includes(query) ||
+          (job.location || '').toLowerCase().includes(query);
+        return matchCat && matchType && matchSearch;
+      });
+
+      countEl.textContent = `تم رصد ${filtered.length} فرصة عمل متاحة`;
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full bg-white rounded-2xl p-12 text-center border border-slate-200">
+            <p class="text-lg font-bold text-slate-700">لا توجد وظائف مطابقة لهذا الفلتر حالياً</p>
+            <p class="text-sm text-slate-500 mt-1">جرب اختيار تصنيف "الكل" أو مسح كلمة البحث</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(job => {
+        const dateStr = job.published_at ? new Date(job.published_at).toLocaleDateString('ar-EG') : 'حديثاً';
+        return `
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 hover:border-emerald-500 hover:shadow-lg transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="text-xs font-bold bg-emerald-50 text-emerald-700 px-3 py-1 rounded-lg border border-emerald-200">
+                  ${job.category || 'عام'}
+                </span>
+                <span class="text-xs font-medium bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md">
+                  ${job.job_type || 'دوام كامل'}
+                </span>
+              </div>
+              <h3 class="text-lg font-extrabold text-slate-900 mb-1.5 leading-snug" dir="auto">${job.title}</h3>
+              <p class="text-sm font-bold text-slate-600 mb-3" dir="auto">
+                🏢 ${job.company} &nbsp;•&nbsp; 📍 ${job.location}
+              </p>
+              <p class="text-xs text-slate-500 line-clamp-2 mb-4 leading-relaxed" dir="auto">
+                ${job.description || ''}
+              </p>
+            </div>
+            <div class="flex items-center justify-between pt-3 border-t border-slate-100 mt-2">
+              <span class="text-xs text-slate-400">📅 ${dateStr} • المصدر: ${job.source}</span>
+              <a
+                href="${job.apply_url}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="bg-slate-900 hover:bg-emerald-600 text-white text-xs md:text-sm font-bold px-4 py-2 rounded-xl transition shadow-sm"
+              >
+                التقديم الآن ↗
+              </a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    renderCategories();
+    loadJobsFromDB();
+  </script>
+</body>
+</html>
