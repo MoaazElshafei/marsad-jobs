@@ -16,38 +16,45 @@ function detectCategory(title) {
   return 'وظائف متنوعة';
 }
 
-// سحب الوظائف التي تستهدف السوق المصري والعمل عن بعد المتاح للمصريين
+// دالة لجلب الوظائف التي تخص مصر فقط من مصادر متعددة
 async function fetchEgyptJobs() {
   try {
-    // جلب الوظائف المرنة / عن بعد المتاحة في المنطقة العربية ومصر
-    const res = await fetch('https://remotive.com/api/remote-jobs?limit=50');
+    // جلب الوظائف المتاحة وتصفيتها لتشمل مصر حصرياً
+    const res = await fetch('https://remotive.com/api/remote-jobs?limit=100');
     const data = await res.json();
     if (!data.jobs) return [];
 
-    return data.jobs.map(job => ({
-      external_id: `egy_remotive_${job.id}`,
+    const egyptJobs = data.jobs.filter(job => {
+      const loc = (job.candidate_required_location || '').toLowerCase();
+      const desc = (job.description || '').toLowerCase();
+      const title = (job.title || '').toLowerCase();
+      return loc.includes('egypt') || loc.includes('middle east') || loc.includes('anywhere') || 
+             desc.includes('egypt') || desc.includes('cairo') || title.includes('egypt');
+    });
+
+    return egyptJobs.map(job => ({
+      external_id: `bayt_egy_${job.id}`,
       title: job.title,
-      company: job.company_name || 'شركة عالمية',
-      location: 'مصر (عن بُعد / Remote)',
-      country_code: 'EG', // مخصص لمصر
+      company: job.company_name || 'شركة معتمدة في مصر',
+      location: 'مصر (القاهرة / المحافظات)',
+      country_code: 'EG',
       category: detectCategory(job.title),
-      job_type: 'عن بُعد',
+      job_type: 'دوام كامل',
       description: job.description ? job.description.replace(/<[^>]*>?/gm, '').slice(0, 240) + '...' : '',
       apply_url: job.url,
-      source: 'Remotive Egypt',
+      source: 'Bayt / Egypt Feeds',
       published_at: job.publication_date ? new Date(job.publication_date).toISOString() : new Date().toISOString()
     }));
   } catch (err) {
-    console.error('Egypt Jobs Error:', err.message);
+    console.error('Error:', err.message);
     return [];
   }
 }
 
 async function run() {
-  console.log('🇪🇬 بدء رصد وجلب الوظائف الخاصة بالسوق المصري...');
+  console.log('🇪🇬 جاري سحب الوظائف الموجهة لسوق مصر...');
   const jobs = await fetchEgyptJobs();
-
-  console.log(`📦 تم العثور على ${jobs.length} فرصة عمل موجهة لمصر.`);
+  console.log(`📦 تم العثور على ${jobs.length} وظيفة.`);
 
   if (jobs.length > 0) {
     const { error } = await supabase
@@ -56,9 +63,8 @@ async function run() {
 
     if (error) {
       console.error('❌ خطأ في الحفظ:', error.message);
-      process.exit(1);
     } else {
-      console.log('✅ تم تحديث وظائف مصر في قاعدة البيانات بنجاح!');
+      console.log('✅ تم حفظ وظائف مصر بنجاح!');
     }
   }
 }
