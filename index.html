@@ -155,7 +155,7 @@
         .select('*')
         .eq('country_code', currentCountry)
         .order('published_at', { ascending: false })
-        .limit(120);
+        .limit(600);
 
       if (error) {
         container.innerHTML = `<div class="col-span-full bg-red-50 text-red-700 p-6 rounded-2xl text-center font-bold">تعذر تحميل الوظائف، يرجى المحاولة لاحقاً.</div>`;
