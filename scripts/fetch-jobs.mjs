@@ -18,48 +18,46 @@ function detectCategory(title) {
 }
 
 async function run() {
-  console.log('🇪🇬 بدء فحص وجلب الوظائف من Apify...');
+  console.log('🇪🇬 جاري الاتصال بمنصة Apify للبحث عن أحدث بيانات مسحوبة...');
 
   if (!apifyToken) {
-    console.error('❌ خطأ: مفتاح APIFY_API_TOKEN مفقود في إعدادات GitHub Secrets!');
+    console.error('❌ خطأ: مفتاح APIFY_API_TOKEN مفقود في GitHub Secrets!');
     return;
   }
 
-  // سنقوم بجلب آخر عمليات التشغيل (Runs) للتاكد من الحصول على البيانات الصحيحة
-  const runsUrl = `https://api.apify.com/v2/actor-runs?token=${apifyToken}&limit=3&desc=true`;
-
   try {
-    const runsRes = await fetch(runsUrl);
+    // جلب قائمة العمليات السابقة لمعرفة آخر Dataset تحتوي على بيانات
+    const runsRes = await fetch(`https://api.apify.com/v2/actor-runs?token=${apifyToken}&limit=5&desc=true`);
     const runsData = await runsRes.json();
     const runs = runsData.data?.items || [];
 
     let datasetId = null;
     for (const run of runs) {
-      if (run.status === 'SUCCEEDED' && run.defaultDatasetId) {
+      if (run.defaultDatasetId) {
         datasetId = run.defaultDatasetId;
         break;
       }
     }
 
     if (!datasetId) {
-      console.error('❌ لم يتم العثور على أي عملية سحب (Run) ناجحة في حساب Apify.');
+      console.error('❌ لم يتم العثور على أي Dataset نشطة في حسابك على Apify.');
       return;
     }
 
-    console.log(`📥 تم العثور على Dataset نشطة برقم: ${datasetId}`);
+    console.log(`📥 تم العثور على Dataset برقم: ${datasetId}، جاري جلب الوظائف...`);
     const itemsRes = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?token=${apifyToken}`);
     const items = await itemsRes.json();
 
     if (Array.isArray(items) && items.length > 0) {
-      console.log(`✅ تم استخراج ${items.length} وظيفة، جاري حفظها في Supabase...`);
+      console.log(`✅ تم العثور على ${items.length} عنصر، جاري معالجتها وحفظها...`);
       
       const mappedJobs = items.map((item, index) => {
-        const title = item.title || item.heading || (item.text ? item.text.split('\n')[0] : `وظيفة مصر ${index + 1}`);
+        const title = item.title || item.heading || (item.text ? item.text.split('\n')[0] : `وظيفة مصرية ${index + 1}`);
         const url = item.url || item.link || 'https://www.jobs-arab.com/eg/';
         const description = item.text || item.description || 'لا توجد تفاصيل متاحة';
 
         return {
-          external_id: `apify_job_${index}_${Math.random().toString(36).substr(2, 6)}`,
+          external_id: `job_item_${index}_${Math.random().toString(36).substr(2, 5)}`,
           title: title.slice(0, 100),
           company: 'وظائف العرب',
           location: 'مصر',
@@ -68,25 +66,26 @@ async function run() {
           job_type: 'دوام كامل',
           description: description.slice(0, 240) + '...',
           apply_url: url,
-          source: 'Jobs Arabs Apify',
+          source: 'Apify Scraper',
           published_at: new Date().toISOString()
         };
       });
 
+      // حفظ البيانات في قاعدة بيانات Supabase
       const { error } = await supabase
         .from('jobs')
         .upsert(mappedJobs, { onConflict: 'external_id', ignoreDuplicates: true });
 
       if (error) {
-        console.error('❌ خطأ أثناء الحفظ في قاعدة بيانات Supabase:', error.message);
+        console.error('❌ خطأ في حفظ قاعدة البيانات:', error.message);
       } else {
         console.log('🎉 تم حفظ الوظائف في Supabase بنجاح وتحديث الموقع!');
       }
     } else {
-      console.log('⚠️ الـ Dataset الحالية فارغة. يرجى التأكد من تشغيل الأداة على Apify مرة واحدة لتوليد بيانات جديدة.');
+      console.log('⚠️ الـ Dataset الحالية فارغة تماماً. يرجى تشغيل أداة السحب على Apify مرة واحدة لتوليد بيانات جديدة.');
     }
   } catch (err) {
-    console.error('❌ حدث خطأ في الاتصال:', err.message);
+    console.error('❌ حدث خطأ غير متوقع:', err.message);
   }
 }
 
