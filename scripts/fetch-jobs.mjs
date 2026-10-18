@@ -19,7 +19,8 @@ function detectCategory(title) {
 
 async function runApifyScraper() {
   if (!apifyToken) {
-    console.error('❌ خطأ: مفتاح APIFY_API_TOKEN مفقود في إعدادات GitHub Secrets!');
+    console.error('const apifyToken = process.env.APIFY_API_TOKEN;
+');
     return;
   }
 
