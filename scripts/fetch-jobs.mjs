@@ -18,97 +18,55 @@ function detectCategory(title) {
 }
 
 async function run() {
-  console.log('🇪🇬 بدء تشغيل جلب الوظائف من أداة Apify المحددة...');
+  console.log('🇪🇬 جاري جلب البيانات من Apify Dataset...');
 
   if (!apifyToken) {
-    console.error('❌ خطأ: مفتاح APIFY_API_TOKEN مفقود في إعدادات GitHub Secrets!');
+    console.error('❌ خطأ: مفتاح APIFY_API_TOKEN مفقود!');
     return;
   }
 
-  // استبدل هذا المعرف بالاسم الحقيقي للـ Actor الظاهر في الأعلى (مثل: blackfalconda~bayt-scraper أو معرف الـ Actor)
-  const actorId = 'blackfalconda~bayt-scraper'; 
-  const runUrl = `https://api.apify.com/v2/acts/${encodeURIComponent(actorId)}/runs?token=${apifyToken}`;
-
+  const datasetUrl = `https://api.apify.com/v2/datasets/last/items?token=${apifyToken}`;
+  
   try {
-    console.log('🚀 جاري إرسال أمر تشغيل الأداة على Apify...');
-    const startRes = await fetch(runUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        country: 'Egypt',
-        maxItems: 15
-      })
-    });
-
-    const startData = await startRes.json();
-    const runId = startData.data?.id;
-
-    if (!runId) {
-      console.error('❌ لم يتم بدء التشغيل بنجاح. تأكد من صحة معرف الـ Actor.');
-      return;
-    }
-
-    console.log(`⏳ تم بدء التشغيل برقم ID: ${runId}، جاري انتظار اكتمال السحب...`);
-
-    // الانتظار حتى تنتهي العملية (حوالي 30 إلى 40 ثانية)
-    let datasetId = null;
-    for (let i = 0; i < 10; i++) {
-      await new Promise(resolve => setTimeout(resolve, 6000)); // انتظار 6 ثوانٍ
-      const statusRes = await fetch(`https://api.apify.com/v2/actor-runs/${runId}?token=${apifyToken}`);
-      const statusData = await statusRes.json();
-      const status = statusData.data?.status;
-      
-      console.log(`🔄 حالة السحب حالياً: ${status}`);
-
-      if (status === 'SUCCEEDED') {
-        datasetId = statusData.data?.defaultDatasetId;
-        break;
-      } else if (status === 'FAILED' || status === 'ABORTED') {
-        console.error('❌ فشلت عملية السحب داخل منصة Apify.');
-        return;
-      }
-    }
-
-    if (!datasetId) {
-      console.error('⌛ انتهت مهلة الانتظار ولم تكتمل العملية.');
-      return;
-    }
-
-    // جلب النتائج من الـ Dataset الناتج
-    console.log(`📥 جاري جلب الوظائف الناتجة من Dataset: ${datasetId}`);
-    const itemsRes = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?token=${apifyToken}`);
-    const items = await itemsRes.json();
+    const response = await fetch(datasetUrl);
+    const items = await response.json();
 
     if (Array.isArray(items) && items.length > 0) {
-      console.log(`✅ تم جلب ${items.length} وظيفة بنجاح! جاري حفظها في Supabase...`);
+      console.log(`✅ تم العثور على ${items.length} عنصر مسحوب، جاري تحويلها وحفظها...`);
+      
+      const mappedJobs = items.map((item, index) => {
+        const title = item.title || item.heading || (item.text ? item.text.slice(0, 50) : `وظيفة رقم ${index + 1}`);
+        const url = item.url || item.link || 'https://www.jobs-arab.com/eg/';
+        const description = item.text || item.description || 'لا توجد تفاصيل متاحة';
 
-      const mappedJobs = items.map(job => ({
-        external_id: `bayt_${job.id || job.jobId || Math.random().toString(36).substr(2, 9)}`,
-        title: job.title || job.jobTitle || 'وظيفة في مصر',
-        company: job.company || job.employerName || 'شركة معتمدة',
-        location: job.location || 'مصر',
-        country_code: 'EG',
-        category: detectCategory(job.title || job.jobTitle),
-        job_type: 'دوام كامل',
-        description: (job.description || job.jobDescription || 'لا توجد تفاصيل').slice(0, 240) + '...',
-        apply_url: job.url || job.applyUrl || 'https://www.bayt.com',
-        source: 'Bayt Apify',
-        published_at: new Date().toISOString()
-      }));
+        return {
+          external_id: `jobsarab_${index}_${Math.random().toString(36).substr(2, 5)}`,
+          title: title.slice(0, 100),
+          company: 'وظائف العرب',
+          location: 'مصر',
+          country_code: 'EG',
+          category: detectCategory(title),
+          job_type: 'دوام كامل',
+          description: description.slice(0, 240) + '...',
+          apply_url: url,
+          source: 'Jobs Arabs',
+          published_at: new Date().toISOString()
+        };
+      });
 
+      // حفظ الوظائف في Supabase
       const { error } = await supabase
         .from('jobs')
         .upsert(mappedJobs, { onConflict: 'external_id', ignoreDuplicates: true });
 
       if (error) {
-        console.error('❌ خطأ أثناء الحفظ في Supabase:', error.message);
+        console.error('❌ خطأ في Supabase:', error.message);
       } else {
-        console.log('🎉 تم حفظ الوظائف في قاعدة البيانات وتحديث الموقع بنجاح تام!');
+        console.log('🎉 تم حفظ الوظائف في قاعدة البيانات بنجاح تام!');
       }
     } else {
-      console.log('⚠️ لم تقم الأداة بإرجاع أي وظائف.');
+      console.log('⚠️ لم يتم العثور على أي عناصر في الـ Dataset.');
     }
-
   } catch (err) {
     console.error('❌ حدث خطأ:', err.message);
   }
