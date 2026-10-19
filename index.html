@@ -51,7 +51,7 @@
         ابحث عن فرصة عملك في مصر في <span class="text-fuchsia-300">ثوانٍ معدودة</span>
       </h2>
       <p class="text-purple-200 text-sm md:text-base max-w-2xl mx-auto">
-        يجمع مرصد الوظائف أحدث الفرص الوظيفية المتاحة في السوق المصري ويصنفها لك تلقائياً
+        يجمع مرصد لك أحدث الفرص الوظيفية المتاحة في السوق المصري ويصنفها لك تلقائياً
       </p>
 
       <!-- شريط البحث والفلاتر -->
@@ -66,41 +66,4 @@
         <select
           id="type-filter"
           onchange="filterJobs()"
-          class="bg-purple-50 text-purple-900 px-4 py-3 rounded-xl font-semibold text-sm focus:outline-none cursor-pointer"
-        >
-          <option value="الكل">كل الوظائف</option>
-          <option value="دوام كامل">وظيفة كاملة</option>
-          <option value="عن بُعد">عمل عن بُعد (Remote)</option>
-        </select>
-      </div>
-    </div>
-  </section>
-
-  <!-- المحتوى الرئيسي -->
-  <main class="max-w-6xl mx-auto px-4 py-8 flex-1 w-full">
-    <!-- شريط التصنيفات -->
-    <div id="category-bar" class="flex items-center gap-2 overflow-x-auto pb-4 mb-6 border-b border-purple-200"></div>
-
-    <!-- عداد الوظائف -->
-    <div class="flex items-center justify-between mb-4">
-      <p id="jobs-count" class="text-sm font-bold text-purple-900">جاري تحميل الوظائف المرصودة...</p>
-      <span class="text-xs text-slate-500">تحديث تلقائي مستمر</span>
-    </div>
-
-    <!-- حاوية البطاقات -->
-    <div id="jobs-container" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
-  </main>
-
-  <!-- الفوتر -->
-  <footer class="bg-purple-950 text-purple-300 text-center py-6 text-xs border-t border-purple-900 mt-12">
-    <p>© 2026 مرصد الوظائف (MarsadJobs) - جميع الحقوق محفوظة | يعمل بنظام الرصد التلقائي الذكي</p>
-  </footer>
-
-  <script>
-    // إعدادات الاتصال الآمن بقاعدة البيانات
-    const SUPABASE_URL = 'https://hsomjtpoqmtymuvzymik.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_MJC4wJAIVMs1O-c0H89qag_ivW0BoUm';
-
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    const CATEGORIES =
+          class="bg-purple-50 text-purple-900 px-4 py-3 rounded-xl font-semibold text-sm focus
