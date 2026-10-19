@@ -265,6 +265,26 @@
     }
 
     loadAnalytics();
+        // تسجيل زيارة الموقع والبلد تلقائياً
+    async function logSiteVisit() {
+      if (sessionStorage.getItem('marsad_visit_logged')) return;
+      try {
+        const res = await fetch('https://ipapi.co/json/');
+        const geo = await res.json();
+        await supabaseClient.from('site_visits').insert([{
+          country_name: geo.country_name || 'مصر',
+          country_code: geo.country_code || 'EG'
+        }]);
+        sessionStorage.setItem('marsad_visit_logged', 'true');
+      } catch (e) {
+        await supabaseClient.from('site_visits').insert([{
+          country_name: 'مصر',
+          country_code: 'EG'
+        }]);
+      }
+    }
+    logSiteVisit();
+
   </script>
 </body>
 </html>
