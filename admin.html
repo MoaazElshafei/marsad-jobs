@@ -10,130 +10,221 @@
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Cairo', sans-serif; background-color: #f9fafb; }
+    
+    /* إخفاء لوحة التحكم افتراضياً حتى يتم تسجيل الدخول */
+    #dashboard-content { display: none; }
+    
+    /* تنسيق شاشة تسجيل الدخول */
+    #login-screen {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #4c1d95; /* لون بنفسجي مطابق للهيدر */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
   </style>
 </head>
 <body class="text-slate-800 min-h-screen flex flex-col">
 
-  <!-- الهيدر العلوي -->
-  <header class="bg-[#4c1d95] text-white shadow-md">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-4">
-        <a href="index.html" class="bg-[#7e22ce] hover:bg-[#6b21a8] text-white px-4 py-1.5 rounded-lg text-sm font-bold transition flex items-center gap-2 shadow-sm">
-          <span>↗</span> عرض الموقع العام
-        </a>
+  <!-- ================= شاشة تسجيل الدخول ================= -->
+  <div id="login-screen">
+    <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md mx-4 text-center">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-100 text-purple-700 mb-4">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
       </div>
-      <div class="flex items-center gap-3">
-        <h1 class="text-lg md:text-xl font-bold">لوحة التحكم والتطبيقات</h1>
-        <span class="bg-[#d946ef] text-white font-black px-4 py-1.5 rounded-lg text-sm shadow">إدارة مرصد</span>
-      </div>
-    </div>
-  </header>
-
-  <!-- المحتوى الرئيسي -->
-  <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full space-y-6">
-    
-    <!-- بطاقات الإحصائيات العلوية -->
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
-        <p class="text-xs text-slate-500 font-bold mb-1">إجمالي الوظائف الحالية</p>
-        <p class="text-2xl font-black text-slate-900" id="stat-total-jobs">0</p>
-      </div>
-      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
-        <p class="text-xs text-slate-500 font-bold mb-1">إجمالي مشاهدات الوظائف</p>
-        <p class="text-2xl font-black text-[#d946ef]" id="stat-total-views">0</p>
-      </div>
-      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
-        <p class="text-xs text-slate-500 font-bold mb-1">إجمالي زيارات الموقع</p>
-        <p class="text-2xl font-black text-[#d946ef]" id="stat-total-visits">0</p>
-      </div>
-      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
-        <p class="text-xs text-slate-500 font-bold mb-1">دول الزوار المرصودة</p>
-        <p class="text-2xl font-black text-emerald-600" id="stat-countries">1</p>
-      </div>
-      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
-        <p class="text-xs text-slate-500 font-bold mb-1">التخصصات النشطة</p>
-        <p class="text-2xl font-black text-blue-600" id="stat-active-cats">0</p>
-      </div>
-      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
-        <p class="text-xs text-slate-500 font-bold mb-1">المصادر المتاحة</p>
-        <p class="text-2xl font-black text-[#d946ef]" id="stat-sources">0</p>
-      </div>
-    </div>
-
-    <!-- قسم الرسوم البيانية -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <h2 class="text-2xl font-black text-slate-800 mb-2">منطقة محظورة</h2>
+      <p class="text-sm text-slate-500 mb-6">يرجى إدخال كلمة المرور للوصول إلى لوحة التحكم</p>
       
-      <!-- رسم بياني دائري (توزيع الزيارات) - تم تصغيره وتوسيطه -->
-      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center justify-center">
-        <h2 class="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2 w-full">🌍 توزيع الزيارات حسب الدولة</h2>
-        <!-- تم تحديد حجم أقصى للرسم البياني هنا -->
-        <div class="relative w-full max-w-[280px] h-[280px] flex items-center justify-center">
-          <canvas id="countryChart"></canvas>
+      <input 
+        type="password" 
+        id="password-input" 
+        placeholder="أدخل كلمة المرور هنا..." 
+        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl mb-4 focus:outline-none focus:border-purple-500 text-center tracking-widest font-bold"
+        onkeypress="if(event.key === 'Enter') checkPassword()"
+      >
+      
+      <p id="error-msg" class="text-red-500 text-sm font-bold mb-4 hidden">كلمة المرور غير صحيحة!</p>
+      
+      <button 
+        onclick="checkPassword()" 
+        class="w-full bg-[#6b21a8] hover:bg-[#4c1d95] text-white font-bold py-3 rounded-xl transition shadow-md"
+      >
+        دخول
+      </button>
+      
+      <a href="index.html" class="block mt-6 text-sm text-slate-400 hover:text-slate-600 transition">العودة للموقع العام ↗</a>
+    </div>
+  </div>
+
+  <!-- ================= محتوى لوحة التحكم (مخفي حتى الدخول) ================= -->
+  <div id="dashboard-content" class="flex-col min-h-screen w-full">
+    
+    <!-- الهيدر العلوي -->
+    <header class="bg-[#4c1d95] text-white shadow-md">
+      <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <a href="index.html" class="bg-[#7e22ce] hover:bg-[#6b21a8] text-white px-4 py-1.5 rounded-lg text-sm font-bold transition flex items-center gap-2 shadow-sm">
+            <span>↗</span> عرض الموقع العام
+          </a>
+          <!-- زر تسجيل الخروج -->
+          <button onclick="logout()" class="text-xs bg-red-500/20 text-red-200 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-lg font-bold transition">
+            خروج 🚪
+          </button>
+        </div>
+        <div class="flex items-center gap-3">
+          <h1 class="text-lg md:text-xl font-bold">لوحة التحكم والتطبيقات</h1>
+          <span class="bg-[#d946ef] text-white font-black px-4 py-1.5 rounded-lg text-sm shadow">إدارة مرصد</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full space-y-6">
+      
+      <!-- بطاقات الإحصائيات العلوية -->
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
+          <p class="text-xs text-slate-500 font-bold mb-1">إجمالي الوظائف الحالية</p>
+          <p class="text-2xl font-black text-slate-900" id="stat-total-jobs">0</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
+          <p class="text-xs text-slate-500 font-bold mb-1">إجمالي مشاهدات الوظائف</p>
+          <p class="text-2xl font-black text-[#d946ef]" id="stat-total-views">0</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
+          <p class="text-xs text-slate-500 font-bold mb-1">إجمالي زيارات الموقع</p>
+          <p class="text-2xl font-black text-[#d946ef]" id="stat-total-visits">0</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
+          <p class="text-xs text-slate-500 font-bold mb-1">دول الزوار المرصودة</p>
+          <p class="text-2xl font-black text-emerald-600" id="stat-countries">1</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
+          <p class="text-xs text-slate-500 font-bold mb-1">التخصصات النشطة</p>
+          <p class="text-2xl font-black text-blue-600" id="stat-active-cats">0</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
+          <p class="text-xs text-slate-500 font-bold mb-1">المصادر المتاحة</p>
+          <p class="text-2xl font-black text-[#d946ef]" id="stat-sources">0</p>
         </div>
       </div>
 
-      <!-- رسم بياني أعمدة (مشاهدات التخصصات) -->
-      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
-        <h2 class="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">📊 مشاهدات الوظائف حسب التخصص</h2>
-        <div class="relative flex-1 min-h-[300px]">
-          <canvas id="categoryChart"></canvas>
+      <!-- قسم الرسوم البيانية -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- رسم بياني دائري -->
+        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center justify-center">
+          <h2 class="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2 w-full">🌍 توزيع الزيارات حسب الدولة</h2>
+          <div class="relative w-full max-w-[280px] h-[280px] flex items-center justify-center">
+            <canvas id="countryChart"></canvas>
+          </div>
+        </div>
+
+        <!-- رسم بياني أعمدة -->
+        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+          <h2 class="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">📊 مشاهدات الوظائف حسب التخصص</h2>
+          <div class="relative flex-1 min-h-[300px]">
+            <canvas id="categoryChart"></canvas>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- جدول تقرير الزيارات -->
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-      <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-        <h2 class="text-sm font-bold text-slate-700 flex items-center gap-2">🚩 تقرير الزيارات حسب البلد</h2>
-      </div>
-      <table class="w-full text-right text-sm">
-        <thead class="bg-white text-slate-500 border-b border-slate-100">
-          <tr>
-            <th class="py-3 px-6 font-bold">البلد</th>
-            <th class="py-3 px-6 font-bold">عدد الزيارات</th>
-            <th class="py-3 px-6 font-bold">النسبة</th>
-          </tr>
-        </thead>
-        <tbody id="country-table-body" class="divide-y divide-slate-100">
-          <!-- سيتم تعبئتها بالجافاسكريبت -->
-        </tbody>
-      </table>
-    </div>
-
-    <!-- جدول أكثر الوظائف تفاعلاً -->
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-      <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-        <h2 class="text-sm font-bold text-slate-700 flex items-center gap-2">🔥 أكثر الوظائف مشاهدة وتفاعلاً</h2>
-      </div>
-      <div class="overflow-x-auto">
-        <table class="w-full text-right text-sm whitespace-nowrap">
+      <!-- جدول تقرير الزيارات -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+          <h2 class="text-sm font-bold text-slate-700 flex items-center gap-2">🚩 تقرير الزيارات حسب البلد</h2>
+        </div>
+        <table class="w-full text-right text-sm">
           <thead class="bg-white text-slate-500 border-b border-slate-100">
             <tr>
-              <th class="py-3 px-6 font-bold">المسمى الوظيفي</th>
-              <th class="py-3 px-6 font-bold text-center">المصدر</th>
-              <th class="py-3 px-6 font-bold text-center">المشاهدات</th>
+              <th class="py-3 px-6 font-bold">البلد</th>
+              <th class="py-3 px-6 font-bold">عدد الزيارات</th>
+              <th class="py-3 px-6 font-bold">النسبة</th>
             </tr>
           </thead>
-          <tbody id="top-jobs-table-body" class="divide-y divide-slate-100">
+          <tbody id="country-table-body" class="divide-y divide-slate-100">
             <!-- سيتم تعبئتها بالجافاسكريبت -->
           </tbody>
         </table>
       </div>
-    </div>
 
-  </main>
+      <!-- جدول أكثر الوظائف تفاعلاً -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+          <h2 class="text-sm font-bold text-slate-700 flex items-center gap-2">🔥 أكثر الوظائف مشاهدة وتفاعلاً</h2>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-right text-sm whitespace-nowrap">
+            <thead class="bg-white text-slate-500 border-b border-slate-100">
+              <tr>
+                <th class="py-3 px-6 font-bold">المسمى الوظيفي</th>
+                <th class="py-3 px-6 font-bold text-center">المصدر</th>
+                <th class="py-3 px-6 font-bold text-center">المشاهدات</th>
+              </tr>
+            </thead>
+            <tbody id="top-jobs-table-body" class="divide-y divide-slate-100">
+              <!-- سيتم تعبئتها بالجافاسكريبت -->
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-  <footer class="text-center py-6 text-xs text-slate-400">
-    © 2026 مرصد الوظائف - لوحة التحكم
-  </footer>
+    </main>
+
+    <footer class="text-center py-6 text-xs text-slate-400">
+      © 2026 مرصد الوظائف - لوحة التحكم
+    </footer>
+  </div>
 
   <script>
-    // إعدادات الاتصال بقاعدة البيانات
+    // ==========================================
+    // 1. نظام حماية كلمة المرور
+    // ==========================================
+    const CORRECT_PASSWORD = "Moaz1612"; 
+    const SESSION_KEY = "marsad_admin_auth";
+
+    // التحقق من وجود جلسة مسجلة مسبقاً
+    window.onload = function() {
+      if (sessionStorage.getItem(SESSION_KEY) === "true") {
+        showDashboard();
+      } else {
+        document.getElementById('password-input').focus();
+      }
+    };
+
+    function checkPassword() {
+      const inputVal = document.getElementById('password-input').value;
+      const errorMsg = document.getElementById('error-msg');
+
+      if (inputVal === CORRECT_PASSWORD) {
+        sessionStorage.setItem(SESSION_KEY, "true"); // حفظ الجلسة
+        showDashboard();
+      } else {
+        errorMsg.classList.remove('hidden');
+        document.getElementById('password-input').value = ''; // مسح الحقل
+      }
+    }
+
+    function showDashboard() {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('dashboard-content').style.display = 'flex';
+      loadDashboardData(); // تشغيل جلب البيانات
+    }
+
+    function logout() {
+      sessionStorage.removeItem(SESSION_KEY);
+      location.reload(); // إعادة تحميل الصفحة لإظهار شاشة الدخول
+    }
+
+    // ==========================================
+    // 2. جلب وعرض البيانات من Supabase
+    // ==========================================
     const SUPABASE_URL = 'https://hsomjtpoqmtymuvzymik.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_MJC4wJAIVMs1O-c0H89qag_ivW0BoUm';
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // ألوان موحدة للرسوم البيانية
     const CHART_COLORS = ['#6b21a8', '#d946ef', '#a855f7', '#8b5cf6', '#7e22ce', '#c084fc', '#9333ea'];
 
     async function loadDashboardData() {
@@ -144,7 +235,7 @@
         return;
       }
 
-      // --- حساب الإحصائيات الأساسية ---
+      // --- حساب الإحصائيات ---
       const totalJobs = jobs.length;
       let totalViews = 0;
       let activeCategories = new Set();
@@ -158,7 +249,6 @@
 
       const totalVisits = 4; // قيمة افتراضية
 
-      // تحديث البطاقات العلوية
       document.getElementById('stat-total-jobs').textContent = totalJobs;
       document.getElementById('stat-total-views').textContent = totalViews;
       document.getElementById('stat-total-visits').textContent = totalVisits;
@@ -166,33 +256,26 @@
       document.getElementById('stat-sources').textContent = sources.size;
       document.getElementById('stat-countries').textContent = '1';
 
-      // --- إعداد بيانات الرسم البياني الدائري (تم تصغيره) ---
-      const countryData = {
-        labels: ['Egypt'],
-        datasets: [{
-          data: [totalVisits],
-          backgroundColor: [CHART_COLORS[0]],
-          borderWidth: 0
-        }]
-      };
-
+      // --- رسم بياني دائري ---
       new Chart(document.getElementById('countryChart'), {
         type: 'doughnut',
-        data: countryData,
+        data: {
+          labels: ['Egypt'],
+          datasets: [{
+            data: [totalVisits],
+            backgroundColor: [CHART_COLORS[0]],
+            borderWidth: 0
+          }]
+        },
         options: {
           responsive: true,
-          maintainAspectRatio: false, // مهم جداً ليعتمد على حجم الحاوية
+          maintainAspectRatio: false,
           cutout: '75%',
-          plugins: { 
-            legend: { 
-              position: 'bottom',
-              labels: { font: { family: 'Cairo', size: 12 } }
-            } 
-          }
+          plugins: { legend: { position: 'bottom', labels: { font: { family: 'Cairo', size: 12 } } } }
         }
       });
 
-      // --- إعداد بيانات الرسم البياني للأعمدة ---
+      // --- رسم بياني أعمدة ---
       const categoryViews = {};
       jobs.forEach(job => {
         if (job.category) {
@@ -200,16 +283,13 @@
         }
       });
 
-      const catLabels = Object.keys(categoryViews);
-      const catData = Object.values(categoryViews);
-
       new Chart(document.getElementById('categoryChart'), {
         type: 'bar',
         data: {
-          labels: catLabels,
+          labels: Object.keys(categoryViews),
           datasets: [{
             label: 'المشاهدات',
-            data: catData,
+            data: Object.values(categoryViews),
             backgroundColor: CHART_COLORS[0],
             borderRadius: 4
           }]
@@ -225,9 +305,8 @@
         }
       });
 
-      // --- تعبئة جدول الزيارات ---
-      const countryTableBody = document.getElementById('country-table-body');
-      countryTableBody.innerHTML = `
+      // --- جدول الزيارات ---
+      document.getElementById('country-table-body').innerHTML = `
         <tr class="hover:bg-slate-50 transition">
           <td class="py-3 px-6 font-bold">Egypt</td>
           <td class="py-3 px-6 text-slate-600">${totalVisits} زيارة</td>
@@ -235,11 +314,9 @@
         </tr>
       `;
 
-      // --- تعبئة جدول أكثر الوظائف تفاعلاً ---
+      // --- جدول أكثر الوظائف تفاعلاً ---
       const topJobs = [...jobs].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 7);
-      const topJobsTableBody = document.getElementById('top-jobs-table-body');
-      
-      topJobsTableBody.innerHTML = topJobs.map(job => `
+      document.getElementById('top-jobs-table-body').innerHTML = topJobs.map(job => `
         <tr class="hover:bg-slate-50 transition">
           <td class="py-3 px-6 text-slate-800 font-bold" dir="auto">${job.title}</td>
           <td class="py-3 px-6 text-center text-slate-500 text-xs">${job.source || 'غير محدد'}</td>
@@ -251,9 +328,6 @@
         </tr>
       `).join('');
     }
-
-    // تشغيل الدالة عند تحميل الصفحة
-    loadDashboardData();
   </script>
 </body>
 </html>
