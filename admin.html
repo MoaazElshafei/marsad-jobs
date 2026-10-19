@@ -18,7 +18,7 @@
     #login-screen {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background-color: #4c1d95; /* لون بنفسجي مطابق للهيدر */
+      background-color: #4c1d95;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -61,22 +61,26 @@
   <!-- ================= محتوى لوحة التحكم (مخفي حتى الدخول) ================= -->
   <div id="dashboard-content" class="flex-col min-h-screen w-full">
     
-    <!-- الهيدر العلوي -->
+    <!-- الهيدر العلوي (تم تعديله ليتناسب مع الموبايل) -->
     <header class="bg-[#4c1d95] text-white shadow-md">
-      <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-4">
-          <a href="index.html" class="bg-[#7e22ce] hover:bg-[#6b21a8] text-white px-4 py-1.5 rounded-lg text-sm font-bold transition flex items-center gap-2 shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+        
+        <!-- الجزء الأيمن: العنوان والشعار -->
+        <div class="flex items-center justify-between w-full md:w-auto gap-3">
+          <h1 class="text-base md:text-lg font-bold whitespace-nowrap">لوحة التحكم والتطبيقات</h1>
+          <span class="bg-[#d946ef] text-white font-black px-3 py-1.5 rounded-lg text-xs md:text-sm shadow whitespace-nowrap">إدارة مرصد</span>
+        </div>
+
+        <!-- الجزء الأيسر: الأزرار -->
+        <div class="flex items-center justify-between w-full md:w-auto gap-2">
+          <a href="index.html" class="bg-[#7e22ce] hover:bg-[#6b21a8] text-white px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition flex items-center gap-1.5 shadow-sm whitespace-nowrap">
             <span>↗</span> عرض الموقع العام
           </a>
-          <!-- زر تسجيل الخروج -->
-          <button onclick="logout()" class="text-xs bg-red-500/20 text-red-200 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-lg font-bold transition">
+          <button onclick="logout()" class="bg-red-500/20 text-red-100 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition whitespace-nowrap">
             خروج 🚪
           </button>
         </div>
-        <div class="flex items-center gap-3">
-          <h1 class="text-lg md:text-xl font-bold">لوحة التحكم والتطبيقات</h1>
-          <span class="bg-[#d946ef] text-white font-black px-4 py-1.5 rounded-lg text-sm shadow">إدارة مرصد</span>
-        </div>
+
       </div>
     </header>
 
@@ -84,48 +88,48 @@
     <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full space-y-6">
       
       <!-- بطاقات الإحصائيات العلوية -->
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
-          <p class="text-xs text-slate-500 font-bold mb-1">إجمالي الوظائف الحالية</p>
-          <p class="text-2xl font-black text-slate-900" id="stat-total-jobs">0</p>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+        <div class="bg-white p-3 md:p-4 rounded-xl border border-slate-200 shadow-sm text-center">
+          <p class="text-[10px] md:text-xs text-slate-500 font-bold mb-1">إجمالي الوظائف الحالية</p>
+          <p class="text-xl md:text-2xl font-black text-slate-900" id="stat-total-jobs">0</p>
         </div>
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
-          <p class="text-xs text-slate-500 font-bold mb-1">إجمالي مشاهدات الوظائف</p>
-          <p class="text-2xl font-black text-[#d946ef]" id="stat-total-views">0</p>
+        <div class="bg-white p-3 md:p-4 rounded-xl border border-slate-200 shadow-sm text-center">
+          <p class="text-[10px] md:text-xs text-slate-500 font-bold mb-1">إجمالي مشاهدات الوظائف</p>
+          <p class="text-xl md:text-2xl font-black text-[#d946ef]" id="stat-total-views">0</p>
         </div>
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
-          <p class="text-xs text-slate-500 font-bold mb-1">إجمالي زيارات الموقع</p>
-          <p class="text-2xl font-black text-[#d946ef]" id="stat-total-visits">0</p>
+        <div class="bg-white p-3 md:p-4 rounded-xl border border-slate-200 shadow-sm text-center">
+          <p class="text-[10px] md:text-xs text-slate-500 font-bold mb-1">إجمالي زيارات الموقع</p>
+          <p class="text-xl md:text-2xl font-black text-[#d946ef]" id="stat-total-visits">0</p>
         </div>
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
-          <p class="text-xs text-slate-500 font-bold mb-1">دول الزوار المرصودة</p>
-          <p class="text-2xl font-black text-emerald-600" id="stat-countries">1</p>
+        <div class="bg-white p-3 md:p-4 rounded-xl border border-slate-200 shadow-sm text-center">
+          <p class="text-[10px] md:text-xs text-slate-500 font-bold mb-1">دول الزوار المرصودة</p>
+          <p class="text-xl md:text-2xl font-black text-emerald-600" id="stat-countries">1</p>
         </div>
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
-          <p class="text-xs text-slate-500 font-bold mb-1">التخصصات النشطة</p>
-          <p class="text-2xl font-black text-blue-600" id="stat-active-cats">0</p>
+        <div class="bg-white p-3 md:p-4 rounded-xl border border-slate-200 shadow-sm text-center">
+          <p class="text-[10px] md:text-xs text-slate-500 font-bold mb-1">التخصصات النشطة</p>
+          <p class="text-xl md:text-2xl font-black text-blue-600" id="stat-active-cats">0</p>
         </div>
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
-          <p class="text-xs text-slate-500 font-bold mb-1">المصادر المتاحة</p>
-          <p class="text-2xl font-black text-[#d946ef]" id="stat-sources">0</p>
+        <div class="bg-white p-3 md:p-4 rounded-xl border border-slate-200 shadow-sm text-center">
+          <p class="text-[10px] md:text-xs text-slate-500 font-bold mb-1">المصادر المتاحة</p>
+          <p class="text-xl md:text-2xl font-black text-[#d946ef]" id="stat-sources">0</p>
         </div>
       </div>
 
       <!-- قسم الرسوم البيانية -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         
         <!-- رسم بياني دائري -->
-        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center justify-center">
-          <h2 class="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2 w-full">🌍 توزيع الزيارات حسب الدولة</h2>
-          <div class="relative w-full max-w-[280px] h-[280px] flex items-center justify-center">
+        <div class="bg-white p-4 md:p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center justify-center">
+          <h2 class="text-xs md:text-sm font-bold text-slate-700 mb-4 flex items-center gap-2 w-full">🌍 توزيع الزيارات حسب الدولة</h2>
+          <div class="relative w-full max-w-[250px] h-[250px] md:max-w-[280px] md:h-[280px] flex items-center justify-center">
             <canvas id="countryChart"></canvas>
           </div>
         </div>
 
         <!-- رسم بياني أعمدة -->
-        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
-          <h2 class="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">📊 مشاهدات الوظائف حسب التخصص</h2>
-          <div class="relative flex-1 min-h-[300px]">
+        <div class="bg-white p-4 md:p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+          <h2 class="text-xs md:text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">📊 مشاهدات الوظائف حسب التخصص</h2>
+          <div class="relative flex-1 min-h-[250px] md:min-h-[300px]">
             <canvas id="categoryChart"></canvas>
           </div>
         </div>
@@ -133,35 +137,37 @@
 
       <!-- جدول تقرير الزيارات -->
       <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-          <h2 class="text-sm font-bold text-slate-700 flex items-center gap-2">🚩 تقرير الزيارات حسب البلد</h2>
+        <div class="p-3 md:p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+          <h2 class="text-xs md:text-sm font-bold text-slate-700 flex items-center gap-2">🚩 تقرير الزيارات حسب البلد</h2>
         </div>
-        <table class="w-full text-right text-sm">
-          <thead class="bg-white text-slate-500 border-b border-slate-100">
-            <tr>
-              <th class="py-3 px-6 font-bold">البلد</th>
-              <th class="py-3 px-6 font-bold">عدد الزيارات</th>
-              <th class="py-3 px-6 font-bold">النسبة</th>
-            </tr>
-          </thead>
-          <tbody id="country-table-body" class="divide-y divide-slate-100">
-            <!-- سيتم تعبئتها بالجافاسكريبت -->
-          </tbody>
-        </table>
+        <div class="overflow-x-auto">
+          <table class="w-full text-right text-xs md:text-sm whitespace-nowrap">
+            <thead class="bg-white text-slate-500 border-b border-slate-100">
+              <tr>
+                <th class="py-2 md:py-3 px-4 md:px-6 font-bold">البلد</th>
+                <th class="py-2 md:py-3 px-4 md:px-6 font-bold">عدد الزيارات</th>
+                <th class="py-2 md:py-3 px-4 md:px-6 font-bold">النسبة</th>
+              </tr>
+            </thead>
+            <tbody id="country-table-body" class="divide-y divide-slate-100">
+              <!-- سيتم تعبئتها بالجافاسكريبت -->
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <!-- جدول أكثر الوظائف تفاعلاً -->
       <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-          <h2 class="text-sm font-bold text-slate-700 flex items-center gap-2">🔥 أكثر الوظائف مشاهدة وتفاعلاً</h2>
+        <div class="p-3 md:p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+          <h2 class="text-xs md:text-sm font-bold text-slate-700 flex items-center gap-2">🔥 أكثر الوظائف مشاهدة وتفاعلاً</h2>
         </div>
         <div class="overflow-x-auto">
-          <table class="w-full text-right text-sm whitespace-nowrap">
+          <table class="w-full text-right text-xs md:text-sm whitespace-nowrap">
             <thead class="bg-white text-slate-500 border-b border-slate-100">
               <tr>
-                <th class="py-3 px-6 font-bold">المسمى الوظيفي</th>
-                <th class="py-3 px-6 font-bold text-center">المصدر</th>
-                <th class="py-3 px-6 font-bold text-center">المشاهدات</th>
+                <th class="py-2 md:py-3 px-4 md:px-6 font-bold">المسمى الوظيفي</th>
+                <th class="py-2 md:py-3 px-4 md:px-6 font-bold text-center">المصدر</th>
+                <th class="py-2 md:py-3 px-4 md:px-6 font-bold text-center">المشاهدات</th>
               </tr>
             </thead>
             <tbody id="top-jobs-table-body" class="divide-y divide-slate-100">
@@ -185,7 +191,6 @@
     const CORRECT_PASSWORD = "Moaz1612"; 
     const SESSION_KEY = "marsad_admin_auth";
 
-    // التحقق من وجود جلسة مسجلة مسبقاً
     window.onload = function() {
       if (sessionStorage.getItem(SESSION_KEY) === "true") {
         showDashboard();
@@ -199,23 +204,23 @@
       const errorMsg = document.getElementById('error-msg');
 
       if (inputVal === CORRECT_PASSWORD) {
-        sessionStorage.setItem(SESSION_KEY, "true"); // حفظ الجلسة
+        sessionStorage.setItem(SESSION_KEY, "true");
         showDashboard();
       } else {
         errorMsg.classList.remove('hidden');
-        document.getElementById('password-input').value = ''; // مسح الحقل
+        document.getElementById('password-input').value = '';
       }
     }
 
     function showDashboard() {
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('dashboard-content').style.display = 'flex';
-      loadDashboardData(); // تشغيل جلب البيانات
+      loadDashboardData();
     }
 
     function logout() {
       sessionStorage.removeItem(SESSION_KEY);
-      location.reload(); // إعادة تحميل الصفحة لإظهار شاشة الدخول
+      location.reload();
     }
 
     // ==========================================
@@ -235,7 +240,6 @@
         return;
       }
 
-      // --- حساب الإحصائيات ---
       const totalJobs = jobs.length;
       let totalViews = 0;
       let activeCategories = new Set();
@@ -247,7 +251,7 @@
         if (job.source) sources.add(job.source);
       });
 
-      const totalVisits = 4; // قيمة افتراضية
+      const totalVisits = 4; 
 
       document.getElementById('stat-total-jobs').textContent = totalJobs;
       document.getElementById('stat-total-views').textContent = totalViews;
@@ -256,7 +260,6 @@
       document.getElementById('stat-sources').textContent = sources.size;
       document.getElementById('stat-countries').textContent = '1';
 
-      // --- رسم بياني دائري ---
       new Chart(document.getElementById('countryChart'), {
         type: 'doughnut',
         data: {
@@ -275,7 +278,6 @@
         }
       });
 
-      // --- رسم بياني أعمدة ---
       const categoryViews = {};
       jobs.forEach(job => {
         if (job.category) {
@@ -305,22 +307,20 @@
         }
       });
 
-      // --- جدول الزيارات ---
       document.getElementById('country-table-body').innerHTML = `
         <tr class="hover:bg-slate-50 transition">
-          <td class="py-3 px-6 font-bold">Egypt</td>
-          <td class="py-3 px-6 text-slate-600">${totalVisits} زيارة</td>
-          <td class="py-3 px-6 font-bold text-[#d946ef]">100.0%</td>
+          <td class="py-2 md:py-3 px-4 md:px-6 font-bold">Egypt</td>
+          <td class="py-2 md:py-3 px-4 md:px-6 text-slate-600">${totalVisits} زيارة</td>
+          <td class="py-2 md:py-3 px-4 md:px-6 font-bold text-[#d946ef]">100.0%</td>
         </tr>
       `;
 
-      // --- جدول أكثر الوظائف تفاعلاً ---
       const topJobs = [...jobs].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 7);
       document.getElementById('top-jobs-table-body').innerHTML = topJobs.map(job => `
         <tr class="hover:bg-slate-50 transition">
-          <td class="py-3 px-6 text-slate-800 font-bold" dir="auto">${job.title}</td>
-          <td class="py-3 px-6 text-center text-slate-500 text-xs">${job.source || 'غير محدد'}</td>
-          <td class="py-3 px-6 text-center font-bold text-slate-700">
+          <td class="py-2 md:py-3 px-4 md:px-6 text-slate-800 font-bold" dir="auto">${job.title}</td>
+          <td class="py-2 md:py-3 px-4 md:px-6 text-center text-slate-500 text-xs">${job.source || 'غير محدد'}</td>
+          <td class="py-2 md:py-3 px-4 md:px-6 text-center font-bold text-slate-700">
             <span class="bg-slate-100 px-2 py-1 rounded-md flex items-center justify-center gap-1 w-max mx-auto">
               👁️ ${job.views || 0}
             </span>
