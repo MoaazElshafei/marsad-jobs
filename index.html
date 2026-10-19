@@ -97,16 +97,18 @@
           type="text"
           oninput="filterJobs()"
           placeholder="ابحث بالمسمى الوظيفي، التخصص، اسم الشركة..."
-          class="flex-1 w-full px-3 md:px-4 py-2.5 md:py-3 text-slate-800 rounded-xl focus:outline-none text-xs md:text-base border border-slate-100"
+          class="flex-1 w-full px-3 md:px-4 py-2.5 md:py-3 text-slate-800 rounded-xl focus:outline-none text-xs md:text-base border border-slate-100 text-right"
         />
+        <!-- تم إضافة text-center و text-right هنا لتوسيط كلمة "كل الوظائف" -->
         <select
           id="type-filter"
           onchange="filterJobs()"
-          class="w-full md:w-auto bg-slate-50 border border-slate-100 text-slate-700 px-3 md:px-4 py-2.5 md:py-3 rounded-xl font-semibold text-xs md:text-sm focus:outline-none cursor-pointer"
+          class="w-full md:w-auto bg-slate-50 border border-slate-100 text-slate-700 px-3 md:px-4 py-2.5 md:py-3 rounded-xl font-semibold text-xs md:text-sm focus:outline-none cursor-pointer text-center"
+          dir="rtl"
         >
-          <option value="الكل">كل الوظائف</option>
-          <option value="دوام كامل">وظيفة كاملة</option>
-          <option value="عن بُعد">عمل عن بُعد (Remote)</option>
+          <option value="الكل" class="text-center">كل الوظائف</option>
+          <option value="دوام كامل" class="text-center">وظيفة كاملة</option>
+          <option value="عن بُعد" class="text-center">عمل عن بُعد (Remote)</option>
         </select>
       </div>
     </div>
@@ -237,7 +239,8 @@
       }
 
       container.innerHTML = filtered.map(job => {
-        const dateStr = job.published_at ? new Date(job.published_at).toLocaleDateString('ar-EG') : 'حديثاً';
+        // تغيير لغة التاريخ إلى الإنجليزية
+        const dateStr = job.published_at ? new Date(job.published_at).toLocaleDateString('en-GB') : 'Recently';
         const viewsCount = job.views || 0;
         
         let displayJobType = job.job_type || 'وظيفة كاملة';
@@ -265,20 +268,22 @@
               </p>
             </div>
             
+            <!-- الفوتر الخاص بالكرت: التاريخ يسار، المصدر وسط، المشاهدات يمين -->
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-3 border-t border-slate-100 gap-3 w-full">
-              <div class="flex flex-wrap items-center gap-1.5 md:gap-2 text-[9px] md:text-xs text-slate-500 font-medium w-full sm:w-auto">
-                <span>📅 ${dateStr}</span>
-                <span class="text-slate-300">|</span>
-                <span class="truncate max-w-[100px] md:max-w-none">🔗 ${job.source}</span>
-                <span class="text-slate-300">|</span>
+              
+              <!-- تم استخدام justify-between هنا لتوزيع العناصر بالتناسق المطلوب -->
+              <div class="flex items-center justify-between w-full text-[10px] md:text-xs text-slate-500 font-medium px-2" dir="ltr">
+                <span class="flex items-center gap-1">📅 ${dateStr}</span>
+                <span class="flex items-center gap-1">🔗 ${job.source}</span>
                 <span class="flex items-center gap-1">👁️ <span id="views-${job.id}">${viewsCount}</span></span>
               </div>
+
               <a
                 href="${job.apply_url}"
                 target="_blank"
                 rel="noopener noreferrer"
                 onclick="trackView('${job.id}')"
-                class="w-full sm:w-auto text-center bg-[#4c1d95] hover:bg-[#d946ef] text-white text-[11px] md:text-sm font-bold px-4 py-2 rounded-xl transition shadow-sm whitespace-nowrap"
+                class="w-full sm:w-auto text-center bg-[#4c1d95] hover:bg-[#d946ef] text-white text-[11px] md:text-sm font-bold px-4 py-2 rounded-xl transition shadow-sm whitespace-nowrap mt-2 sm:mt-0"
               >
                 التقديم الآن ↗
               </a>
