@@ -6,29 +6,24 @@
   <title>مرصد الوظائف | MarsadJobs - وظائف مصر والوطن العربي</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- استدعاء خطوط بوزن 300 الخفيف وخط Mono للأكواد والبيانات -->
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   
   <style>
     :root {
-      --color-forest-depths: #1c3a13;
-      --color-lime-pulse: #d3fa99;
-      --color-sage-moss: #757c5d;
-      --color-olive-gold: #9f995b;
-      --color-eucalyptus: #698e79;
-      --color-snow-white: #fcfcf7;
-      --color-warm-stone: #eeeee9;
-      --color-frosted-glass: #c4c7c4;
-      --color-ash: #b3b3b3;
-      --color-pewter: #666666;
-      --color-ink: #000000;
+      --forest: #1c3a13;
+      --lime: #d3fa99;
+      --snow: #fcfcf7;
+      --stone: #eeeee9;
+      --stone-hover: #e4e4dd;
+      --pewter: #666666;
+      --ash: #b3b3b3;
+      --frosted: #c4c7c4;
     }
 
     body {
-      font-family: 'Cairo', 'Inter', sans-serif;
-      background-color: var(--color-snow-white);
-      color: var(--color-forest-depths);
-      font-weight: 400;
+      font-family: 'Cairo', sans-serif;
+      background-color: var(--snow);
+      color: var(--forest);
       margin: 0;
     }
 
@@ -37,68 +32,368 @@
       letter-spacing: 0.015em;
     }
 
-    /* Whisper-light display typography */
-    .seed-display {
-      font-weight: 300;
-      line-height: 1.15;
-      letter-spacing: -0.4px;
-    }
+    /* ألوان وأسطح نظام Seed */
+    .bg-forest { background-color: var(--forest); color: var(--snow); }
+    .bg-snow { background-color: var(--snow); color: var(--forest); }
+    .bg-stone { background-color: var(--stone); color: var(--forest); }
+    .bg-lime { background-color: var(--lime); color: var(--forest); }
+    
+    .text-forest { color: var(--forest); }
+    .text-snow { color: var(--snow); }
+    .text-pewter { color: var(--pewter); }
+    
+    .border-stone { border-color: var(--stone); }
+    .border-forest { border-color: var(--forest); }
+    .border-frosted { border-color: var(--frosted); }
+    .border-ash { border-color: var(--ash); }
 
-    .seed-subheading {
-      font-weight: 300;
-      line-height: 1.25;
-      letter-spacing: -0.2px;
-    }
+    /* الأزرار والشارات بحواف دائرية كاملة 1000px */
+    .pill { border-radius: 1000px; }
+    .card-radius { border-radius: 16px; }
 
-    /* Custom placeholder for dark section inputs */
+    .btn-primary {
+      background-color: var(--forest);
+      color: var(--snow);
+      border-radius: 1000px;
+      padding: 10px 24px;
+      font-weight: 400;
+      transition: opacity 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+
+    .btn-outline {
+      background-color: var(--snow);
+      color: var(--forest);
+      border: 1.5px solid var(--forest);
+      border-radius: 1000px;
+      padding: 8px 20px;
+      font-weight: 400;
+      transition: background-color 0.2s;
+    }
+    .btn-outline:hover { background-color: var(--stone); }
+
+    /* حقول الإدخال داخل القسم الداكن */
+    .seed-input {
+      background-color: rgba(252, 252, 247, 0.06);
+      border: 1.5px solid var(--snow);
+      color: var(--snow);
+      border-radius: 8px;
+      padding: 12px 16px;
+    }
     .seed-input::placeholder {
-      color: rgba(252, 252, 247, 0.55);
+      color: rgba(252, 252, 247, 0.6);
+    }
+    .seed-input:focus {
+      outline: none;
+      border-color: var(--lime);
     }
 
-    /* إخفاء شريط التمرير مع الحفاظ على وظيفته */
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
+    .seed-select {
+      background-color: var(--forest);
+      border: 1.5px solid var(--snow);
+      color: var(--snow);
+      border-radius: 8px;
+      padding: 12px 16px;
     }
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
+
+    .job-card {
+      background-color: var(--stone);
+      border-radius: 16px;
+      padding: 24px;
+      transition: background-color 0.2s;
+    }
+    .job-card:hover {
+      background-color: var(--stone-hover);
     }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-  <!-- Promo Banner (شريط الإعلانات العلوي النحيف) -->
-  <div class="w-full h-[40px] bg-[#fcfcf7] text-[#1c3a13] border-b border-[#eeeee9] flex items-center justify-center px-4 text-[12px] font-medium uppercase tracking-wide">
+  <!-- الشريط العلوي النحيف (Promo Banner) -->
+  <div class="w-full py-2.5 bg-snow border-b border-stone flex items-center justify-center px-4 text-xs font-medium">
     <div class="flex items-center gap-2">
-      <span class="w-2 h-2 rounded-full bg-[#1c3a13] inline-block"></span>
+      <span class="w-2 h-2 rounded-full bg-forest inline-block"></span>
       <span>رصد آلي لحظي لوظائف مصر على مدار الساعة — يعمل دون وسطاء</span>
     </div>
   </div>
 
-  <!-- Navigation Bar (شريط التنقل الرئيسي) -->
-  <header class="bg-[#fcfcf7] text-[#1c3a13] sticky top-0 z-30 border-b border-[#eeeee9] h-[72px] flex items-center">
-    <div class="max-w-[1200px] w-full mx-auto px-6 flex items-center justify-between">
+  <!-- الهيدر وشريط التنقل -->
+  <header class="bg-snow sticky top-0 z-30 border-b border-stone py-4">
+    <div class="max-w-6xl w-full mx-auto px-4 md:px-6 flex items-center justify-between">
       
-      <!-- الشعار + النقطة الخضراء المميزة -->
-      <div class="flex items-center gap-3">
-        <a href="#" class="flex items-center gap-1.5 text-[24px] font-normal tracking-tight text-[#1c3a13]">
-          <span>مرصد</span>
-          <span class="w-2.5 h-2.5 rounded-full bg-[#1c3a13] inline-block"></span>
-          <span class="font-mono-code text-[12px] border-[1.5px] border-[#1c3a13] rounded-[1000px] px-2 py-0.5 mr-1">MJ-01®</span>
-        </a>
+      <!-- الشعار -->
+      <div class="flex items-center gap-2">
+        <span class="text-2xl font-normal tracking-tight text-forest">مرصد</span>
+        <span class="w-2.5 h-2.5 rounded-full bg-forest inline-block"></span>
+        <span class="font-mono-code text-xs border border-forest pill px-2.5 py-0.5">MJ-01®</span>
       </div>
 
-      <!-- الأزرار التفاعلية (Ghost / Inverted & Primary Filled) -->
+      <!-- أزرار التحكم والدول -->
       <div class="flex items-center gap-2">
         <div id="country-buttons" class="flex items-center">
-          <button onclick="selectCountry('EG')" data-country="EG" class="bg-[#fcfcf7] text-[#1c3a13] border-[1.5px] border-[#1c3a13] rounded-[1000px] px-5 py-2 text-[14px] font-normal flex items-center gap-1.5 transition hover:bg-[#eeeee9]">
+          <button onclick="selectCountry('EG')" data-country="EG" class="btn-outline text-xs md:text-sm flex items-center gap-1.5">
             <span>🇪🇬</span><span>مصر</span>
           </button>
         </div>
 
-        <a href="admin.html" class="bg-[#1c3a13] text-[#fcfcf7] rounded-[1000px] px-6 py-2.5 text-[14px] font-normal transition hover:opacity-90">
+        <a href="admin.html" class="btn-primary text-xs md:text-sm">
           لوحة التحكم
         </a>
       </div>
 
     </div>
+  </header>
+
+  <!-- قسم البحث الرئيسي (Forest Depths Dark Section) -->
+  <section class="bg-forest py-12 md:py-20 px-4 md:px-6">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+      
+      <!-- العنوان والوصف -->
+      <div class="lg:col-span-7 space-y-4 text-right">
+        <div class="inline-flex items-center gap-2 bg-lime px-3.5 py-1 pill text-xs font-medium">
+          <span class="font-mono-code uppercase">LIVEFEED • EG-26</span>
+          <span>• تحديث مستمر</span>
+        </div>
+
+        <h1 class="text-3xl md:text-5xl font-light leading-tight">
+          ابحث عن فرصة عملك في مصر في ثوانٍ معدودة.
+        </h1>
+
+        <p class="text-sm md:text-base opacity-80 font-light leading-relaxed max-w-xl">
+          يجمع مرصد الوظائف أحدث الفرص الوظيفية المتاحة في السوق المصري ويصنفها لك تلقائياً بدقة علمية وتجربة قراءة هادئة.
+        </p>
+      </div>
+
+      <!-- صندوق البحث والفلاتر -->
+      <div class="lg:col-span-5 border border-stone/20 card-radius p-5 space-y-4" style="background-color: rgba(252, 252, 247, 0.04);">
+        <div class="flex items-center justify-between text-xs font-mono-code opacity-70 pb-2 border-b border-stone/20">
+          <span>SEARCH PARAMETERS</span>
+          <span>SYS-FILTER</span>
+        </div>
+
+        <div class="space-y-3">
+          <input
+            id="search-input"
+            type="text"
+            oninput="filterJobs()"
+            placeholder="ابحث بالمسمى الوظيفي، الشركة، أو المدينة..."
+            class="seed-input w-full text-sm md:text-base"
+          />
+
+          <select
+            id="type-filter"
+            onchange="filterJobs()"
+            class="seed-select w-full text-sm md:text-base cursor-pointer"
+          >
+            <option value="الكل">كل أنواع الدوام</option>
+            <option value="دوام كامل">دوام كامل</option>
+            <option value="عن بُعد">عمل عن بُعد (Remote)</option>
+          </select>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- المحتوى الرئيسي -->
+  <main class="max-w-6xl mx-auto px-4 md:px-6 py-10 flex-1 w-full">
+    
+    <!-- شريط التصنيفات -->
+    <div class="mb-8">
+      <div class="text-xs font-mono-code text-pewter uppercase mb-3">TAXONOMY / تصنيف الوظائف</div>
+      <div id="category-bar" class="flex items-center gap-2 overflow-x-auto pb-3"></div>
+    </div>
+
+    <!-- عداد الوظائف -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 mb-6 border-b border-stone">
+      <p id="jobs-count" class="text-base font-medium text-forest">جاري تحميل الوظائف المرصودة...</p>
+      <span class="font-mono-code text-xs text-pewter">INDEX STATUS: ACTIVESYNC</span>
+    </div>
+
+    <!-- حاوية البطاقات -->
+    <div id="jobs-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+
+  </main>
+
+  <!-- الفوتر -->
+  <footer class="bg-forest py-12 px-4 md:px-6 mt-12">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs opacity-80">
+      <div class="flex items-center gap-2">
+        <span class="font-medium text-base">مرصد الوظائف | MarsadJobs</span>
+        <span class="w-2 h-2 rounded-full bg-lime inline-block"></span>
+      </div>
+      <p class="font-light text-center">
+        © 2026 جميع الحقوق محفوظة — يعمل بنظام الرصد التلقائي الذكي
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    const SUPABASE_URL = 'https://hsomjtpoqmtymuvzymik.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_MJC4wJAIVMs1O-c0H89qag_ivW0BoUm';
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const CATEGORIES = [
+      'الكل',
+      'مبيعات وعقارات',
+      'تكنولوجيا ومعلومات',
+      'محاسبة ومالية',
+      'هندسة وإنشاءات',
+      'تسويق وصناعة محتوى',
+      'إدارة وخدمة عملاء',
+      'وظائف متنوعة'
+    ];
+
+    let allJobs = [];
+    let currentCountry = 'EG';
+    let currentCategory = 'الكل';
+
+    function renderCategories() {
+      const bar = document.getElementById('category-bar');
+      bar.innerHTML = CATEGORIES.map(cat => {
+        const isActive = currentCategory === cat;
+        return `
+          <button
+            onclick="selectCategory('${cat}')"
+            class="whitespace-nowrap text-sm transition ${
+              isActive ? 'btn-primary' : 'btn-outline'
+            }"
+          >
+            ${cat}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectCategory(cat) {
+      currentCategory = cat;
+      renderCategories();
+      filterJobs();
+    }
+
+    function selectCountry(code) {
+      currentCountry = code;
+      loadJobsFromDB();
+    }
+
+    async function loadJobsFromDB() {
+      const container = document.getElementById('jobs-container');
+      const countEl = document.getElementById('jobs-count');
+      container.innerHTML = '<div class="col-span-full text-center py-16 text-pewter font-light text-lg">⏳ جاري رصد وتحميل أحدث الوظائف...</div>';
+
+      const { data, error } = await supabaseClient
+        .from('jobs')
+        .select('*')
+        .eq('country_code', currentCountry)
+        .order('published_at', { ascending: false })
+        .limit(600);
+
+      if (error) {
+        container.innerHTML = '<div class="col-span-full bg-stone p-8 card-radius text-center font-medium">تعذر تحميل الوظائف حالياً، يرجى المحاولة لاحقاً.</div>';
+        countEl.textContent = 'خطأ في الاتصال';
+        return;
+      }
+
+      allJobs = data || [];
+      filterJobs();
+    }
+
+    function filterJobs() {
+      const query = document.getElementById('search-input').value.toLowerCase();
+      const typeFilter = document.getElementById('type-filter').value;
+      const container = document.getElementById('jobs-container');
+      const countEl = document.getElementById('jobs-count');
+
+      const filtered = allJobs.filter(job => {
+        const matchCat = currentCategory === 'الكل' || job.category === currentCategory;
+        const matchType = typeFilter === 'الكل' || (job.job_type && job.job_type.includes(typeFilter));
+        const matchSearch =
+          (job.title || '').toLowerCase().includes(query) ||
+          (job.company || '').toLowerCase().includes(query) ||
+          (job.location || '').toLowerCase().includes(query);
+        return matchCat && matchType && matchSearch;
+      });
+
+      countEl.textContent = 'تم رصد ' + filtered.length + ' فرصة عمل متاحة';
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full bg-stone card-radius p-12 text-center">
+            <p class="text-xl font-light text-forest">لا توجد وظائف مطابقة لهذا الفلتر حالياً</p>
+            <p class="text-sm text-pewter mt-2">جرب اختيار تصنيف "الكل" أو مسح كلمة البحث</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map((job, idx) => {
+        const dateStr = job.published_at ? new Date(job.published_at).toLocaleDateString('ar-EG') : 'حديثاً';
+        const specimenCode = 'JB-' + String(idx + 1).padStart(3, '0');
+        return `
+          <div class="job-card flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <div class="flex items-center gap-2">
+                  <span class="font-mono-code text-xs border border-forest text-forest px-2.5 py-0.5 pill">
+                    ${specimenCode}
+                  </span>
+                  <span class="text-xs font-medium bg-lime px-3 py-1 pill">
+                    ${job.category || 'عام'}
+                  </span>
+                </div>
+                <span class="text-xs text-pewter border border-ash px-2.5 py-0.5 pill">
+                  ${job.job_type || 'دوام كامل'}
+                </span>
+              </div>
+
+              <h3 class="text-xl font-normal text-forest mb-1.5 leading-snug" dir="auto">
+                ${job.title}
+              </h3>
+
+              <p class="text-sm font-medium text-forest mb-3" dir="auto">
+                🏢 ${job.company} &nbsp;—&nbsp; <span class="text-pewter">📍 ${job.location}</span>
+              </p>
+
+              <p class="text-xs text-pewter line-clamp-2 mb-5 leading-relaxed" dir="auto">
+                ${job.description || ''}
+              </p>
+            </div>
+
+            <div class="pt-4 border-t border-frosted flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex flex-wrap items-center justify-between sm:justify-start gap-4 text-xs text-pewter font-mono-code">
+                <span>📅 ${dateStr}</span>
+                <span>المصدر: <strong class="text-forest">${job.source || 'مباشر'}</strong></span>
+                <span class="text-forest">👁 <strong id="views-${job.id}">${job.views || 0}</strong> مشاهدة</span>
+              </div>
+
+              <a
+                href="${job.apply_url}"
+                target="_blank"
+                rel="noopener noreferrer"
+                onclick="trackView('${job.id}')"
+                class="btn-primary text-xs md:text-sm text-center shrink-0"
+              >
+                التقديم الآن ←
+              </a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function trackView(id) {
+      try {
+        const { data } = await supabaseClient.rpc('increment_job_views', { job_id: id });
+        const el = document.getElementById('views-' + id);
+        if (el && typeof data === 'number') el.textContent = data;
+        const job = allJobs.find(j => j.id === id);
+        if (job && typeof data === 'number') job.views = data;
+      } catch (e) {}
+    }
+
+    renderCategories();
+    loadJobsFromDB();
+  </script>
+</body>
+</html>
