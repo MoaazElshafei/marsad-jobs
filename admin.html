@@ -262,4 +262,104 @@
             <tr>
               <td class="py-3 font-bold text-slate-800">${country}</td>
               <td class="py-3 font-bold text-purple-900">${count} زيارة</td>
-              <td class="py-3 text-f
+              <td class="py-3 text-fuchsia-700 font-bold">${percent}%</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      const topJobsTbody = document.getElementById('top-jobs-table-body');
+      const sortedJobsByViews = [...allJobs].sort((a, b) => (Number(b.views) || 0) - (Number(a.views) || 0)).slice(0, 7);
+      if (sortedJobsByViews.length === 0) {
+        topJobsTbody.innerHTML = `<tr><td colspan="3" class="py-4 text-center text-slate-400">لا توجد بيانات</td></tr>`;
+      } else {
+        topJobsTbody.innerHTML = sortedJobsByViews.map(job => `
+          <tr>
+            <td class="py-3 font-bold text-slate-800 line-clamp-1" dir="auto">${job.title}</td>
+            <td class="py-3 text-slate-500 text-xs">${job.source || '-'}</td>
+            <td class="py-3 font-extrabold text-fuchsia-700">👁 ${job.views || 0}</td>
+          </tr>
+        `).join('');
+      }
+
+      const tbody = document.getElementById('jobs-table-body');
+      tbody.innerHTML = allJobs.map(job => `
+        <tr class="hover:bg-purple-50/50">
+          <td class="py-3 px-2 font-bold text-slate-800">${job.title}</td>
+          <td class="py-3 px-2 text-slate-600">${job.company}</td>
+          <td class="py-3 px-2 text-slate-500">${job.location}</td>
+          <td class="py-3 px-2"><span class="bg-fuchsia-50 text-fuchsia-800 px-2 py-0.5 rounded text-xs border border-fuchsia-200">${job.category}</span></td>
+          <td class="py-3 px-2 text-xs text-slate-400">${job.source}</td>
+          <td class="py-3 px-2 text-center">
+            <button onclick="deleteJob('${job.id}')" class="bg-red-100 hover:bg-red-600 hover:text-white text-red-600 px-3 py-1.5 rounded-lg text-xs transition font-bold">
+              حذف
+            </button>
+          </td>
+        </tr>
+      `).join('');
+
+      const countryLabels = sortedCountries.length ? sortedCountries.map(c => c[0]) : ['لا توجد زيارات'];
+      const countryData = sortedCountries.length ? sortedCountries.map(c => c[1]) : [1];
+      new Chart(document.getElementById('countriesChart'), {
+        type: 'doughnut',
+        data: {
+          labels: countryLabels,
+          datasets: [{ data: countryData, backgroundColor: ['#581c87', '#c026d3', '#9333ea', '#e879f9', '#3b0764'] }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+      });
+
+      const catViews = {};
+      allJobs.forEach(j => {
+        const cat = j.category || 'عام';
+        catViews[cat] = (catViews[cat] || 0) + (Number(j.views) || 0);
+      });
+      new Chart(document.getElementById('viewsByCategoryChart'), {
+        type: 'bar',
+        data: {
+          labels: Object.keys(catViews),
+          datasets: [{ label: 'المشاهدات', data: Object.values(catViews), backgroundColor: '#701a75', borderRadius: 8 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+      });
+    }
+
+    async function addManualJob(e) {
+      e.preventDefault();
+      const newJob = {
+        external_id: `manual_${Date.now()}`,
+        title: document.getElementById('m-title').value,
+        company: document.getElementById('m-company').value,
+        location: document.getElementById('m-location').value,
+        country_code: 'EG',
+        category: document.getElementById('m-category').value,
+        job_type: document.getElementById('m-type').value,
+        description: document.getElementById('m-desc').value,
+        apply_url: document.getElementById('m-url').value,
+        source: 'إضافة يدوية (Admin)',
+        published_at: new Date().toISOString()
+      };
+
+      const { error } = await supabaseAdmin.from('jobs').insert([newJob]);
+      if (error) {
+        alert('حدث خطأ أثناء النشر: ' + error.message);
+      } else {
+        alert('تمت إضافة الوظيفة بنجاح وتحديث الموقع!');
+        document.getElementById('add-job-form').reset();
+        loadAdminData();
+      }
+    }
+
+    async function deleteJob(id) {
+      if (confirm('هل أنت متأكد من حذف هذه الوظيفة نهائياً من الموقع؟')) {
+        const { error } = await supabaseAdmin.from('jobs').delete().eq('id', id);
+        if (error) {
+          alert('خطأ أثناء الحذف: ' + error.message);
+        } else {
+          loadAdminData();
+        }
+      }
+    }
+  </script>
+</body>
+</html>
