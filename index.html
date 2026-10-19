@@ -6,229 +6,98 @@
   <title>مرصد الوظائف | MarsadJobs - وظائف مصر والوطن العربي</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --forest: #1c3a13;
-      --lime: #d3fa99;
-      --snow: #fcfcf7;
-      --stone: #eeeee9;
-      --stone-hover: #e4e4dd;
-      --pewter: #666666;
-      --ash: #b3b3b3;
-      --frosted: #c4c7c4;
-    }
-
-    body {
-      font-family: 'Cairo', sans-serif;
-      background-color: var(--snow);
-      color: var(--forest);
-      margin: 0;
-    }
-
-    .font-mono-code {
-      font-family: 'JetBrains Mono', monospace;
-      letter-spacing: 0.015em;
-    }
-
-    /* ألوان وأسطح نظام Seed */
-    .bg-forest { background-color: var(--forest); color: var(--snow); }
-    .bg-snow { background-color: var(--snow); color: var(--forest); }
-    .bg-stone { background-color: var(--stone); color: var(--forest); }
-    .bg-lime { background-color: var(--lime); color: var(--forest); }
-    
-    .text-forest { color: var(--forest); }
-    .text-snow { color: var(--snow); }
-    .text-pewter { color: var(--pewter); }
-    
-    .border-stone { border-color: var(--stone); }
-    .border-forest { border-color: var(--forest); }
-    .border-frosted { border-color: var(--frosted); }
-    .border-ash { border-color: var(--ash); }
-
-    /* الأزرار والشارات بحواف دائرية كاملة 1000px */
-    .pill { border-radius: 1000px; }
-    .card-radius { border-radius: 16px; }
-
-    .btn-primary {
-      background-color: var(--forest);
-      color: var(--snow);
-      border-radius: 1000px;
-      padding: 10px 24px;
-      font-weight: 400;
-      transition: opacity 0.2s;
-    }
-    .btn-primary:hover { opacity: 0.9; }
-
-    .btn-outline {
-      background-color: var(--snow);
-      color: var(--forest);
-      border: 1.5px solid var(--forest);
-      border-radius: 1000px;
-      padding: 8px 20px;
-      font-weight: 400;
-      transition: background-color 0.2s;
-    }
-    .btn-outline:hover { background-color: var(--stone); }
-
-    /* حقول الإدخال داخل القسم الداكن */
-    .seed-input {
-      background-color: rgba(252, 252, 247, 0.06);
-      border: 1.5px solid var(--snow);
-      color: var(--snow);
-      border-radius: 8px;
-      padding: 12px 16px;
-    }
-    .seed-input::placeholder {
-      color: rgba(252, 252, 247, 0.6);
-    }
-    .seed-input:focus {
-      outline: none;
-      border-color: var(--lime);
-    }
-
-    .seed-select {
-      background-color: var(--forest);
-      border: 1.5px solid var(--snow);
-      color: var(--snow);
-      border-radius: 8px;
-      padding: 12px 16px;
-    }
-
-    .job-card {
-      background-color: var(--stone);
-      border-radius: 16px;
-      padding: 24px;
-      transition: background-color 0.2s;
-    }
-    .job-card:hover {
-      background-color: var(--stone-hover);
-    }
+    body { font-family: 'Cairo', sans-serif; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col">
-
-  <!-- الشريط العلوي النحيف (Promo Banner) -->
-  <div class="w-full py-2.5 bg-snow border-b border-stone flex items-center justify-center px-4 text-xs font-medium">
-    <div class="flex items-center gap-2">
-      <span class="w-2 h-2 rounded-full bg-forest inline-block"></span>
-      <span>رصد آلي لحظي لوظائف مصر على مدار الساعة — يعمل دون وسطاء</span>
-    </div>
-  </div>
+<body class="bg-purple-50/40 text-slate-900 min-h-screen flex flex-col">
 
   <!-- الهيدر وشريط التنقل -->
-  <header class="bg-snow sticky top-0 z-30 border-b border-stone py-4">
-    <div class="max-w-6xl w-full mx-auto px-4 md:px-6 flex items-center justify-between">
-      
-      <!-- الشعار -->
-      <div class="flex items-center gap-2">
-        <span class="text-2xl font-normal tracking-tight text-forest">مرصد</span>
-        <span class="w-2.5 h-2.5 rounded-full bg-forest inline-block"></span>
-        <span class="font-mono-code text-xs border border-forest pill px-2.5 py-0.5">MJ-01®</span>
+  <header class="bg-purple-950 text-white border-b border-purple-900 sticky top-0 z-30 shadow-md">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <span class="bg-fuchsia-600 text-white font-black px-3.5 py-1.5 rounded-xl text-xl shadow">
+          مرصد
+        </span>
+        <div>
+          <h1 class="text-xl font-bold tracking-wide">مرصد الوظائف | MarsadJobs</h1>
+          <p class="text-xs text-purple-200">رصد آلي لحظي لوظائف مصر على مدار الساعة</p>
+        </div>
       </div>
 
-      <!-- أزرار التحكم والدول -->
-      <div class="flex items-center gap-2">
-        <div id="country-buttons" class="flex items-center">
-          <button onclick="selectCountry('EG')" data-country="EG" class="btn-outline text-xs md:text-sm flex items-center gap-1.5">
+      <!-- زر لوحة التحكم السريع والدول -->
+      <div class="flex items-center gap-3">
+        <a href="admin.html" class="bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold px-3.5 py-1.5 rounded-xl text-xs transition shadow flex items-center gap-1">
+          ⚙️ لوحة التحكم
+        </a>
+        <div class="flex items-center gap-2 overflow-x-auto" id="country-buttons">
+          <button onclick="selectCountry('EG')" data-country="EG" class="country-btn bg-fuchsia-600 text-white font-bold px-3.5 py-1.5 rounded-full text-sm flex items-center gap-1.5 shadow transition">
             <span>🇪🇬</span><span>مصر</span>
           </button>
         </div>
-
-        <a href="admin.html" class="btn-primary text-xs md:text-sm">
-          لوحة التحكم
-        </a>
       </div>
-
     </div>
   </header>
 
-  <!-- قسم البحث الرئيسي (Forest Depths Dark Section) -->
-  <section class="bg-forest py-12 md:py-20 px-4 md:px-6">
-    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-      
-      <!-- العنوان والوصف -->
-      <div class="lg:col-span-7 space-y-4 text-right">
-        <div class="inline-flex items-center gap-2 bg-lime px-3.5 py-1 pill text-xs font-medium">
-          <span class="font-mono-code uppercase">LIVEFEED • EG-26</span>
-          <span>• تحديث مستمر</span>
-        </div>
-
-        <h1 class="text-3xl md:text-5xl font-light leading-tight">
-          ابحث عن فرصة عملك في مصر في ثوانٍ معدودة.
-        </h1>
-
-        <p class="text-sm md:text-base opacity-80 font-light leading-relaxed max-w-xl">
-          يجمع مرصد الوظائف أحدث الفرص الوظيفية المتاحة في السوق المصري ويصنفها لك تلقائياً بدقة علمية وتجربة قراءة هادئة.
-        </p>
+  <!-- قسم البحث الرئيسي -->
+  <section class="bg-gradient-to-b from-purple-950 to-purple-900 text-white py-12 px-4 shadow-inner">
+    <div class="max-w-4xl mx-auto text-center space-y-5">
+      <div class="inline-flex items-center gap-2 bg-fuchsia-500/10 border border-fuchsia-500/30 text-fuchsia-300 px-3 py-1 rounded-full text-xs font-semibold">
+        <span class="w-2 h-2 rounded-full bg-fuchsia-400 animate-ping"></span>
+        يعمل بالرصد التلقائي الذكي دون وسطاء
       </div>
+      <h2 class="text-2xl md:text-4xl font-extrabold leading-relaxed">
+        ابحث عن فرصة عملك في مصر في <span class="text-fuchsia-300">ثوانٍ معدودة</span>
+      </h2>
+      <p class="text-purple-200 text-sm md:text-base max-w-2xl mx-auto">
+        يجمع مرصد الوظائف أحدث الفرص الوظيفية المتاحة في السوق المصري ويصنفها لك تلقائياً
+      </p>
 
-      <!-- صندوق البحث والفلاتر -->
-      <div class="lg:col-span-5 border border-stone/20 card-radius p-5 space-y-4" style="background-color: rgba(252, 252, 247, 0.04);">
-        <div class="flex items-center justify-between text-xs font-mono-code opacity-70 pb-2 border-b border-stone/20">
-          <span>SEARCH PARAMETERS</span>
-          <span>SYS-FILTER</span>
-        </div>
-
-        <div class="space-y-3">
-          <input
-            id="search-input"
-            type="text"
-            oninput="filterJobs()"
-            placeholder="ابحث بالمسمى الوظيفي، الشركة، أو المدينة..."
-            class="seed-input w-full text-sm md:text-base"
-          />
-
-          <select
-            id="type-filter"
-            onchange="filterJobs()"
-            class="seed-select w-full text-sm md:text-base cursor-pointer"
-          >
-            <option value="الكل">كل أنواع الدوام</option>
-            <option value="دوام كامل">دوام كامل</option>
-            <option value="عن بُعد">عمل عن بُعد (Remote)</option>
-          </select>
-        </div>
+      <!-- شريط البحث والفلاتر -->
+      <div class="bg-white p-2 rounded-2xl shadow-xl flex flex-col md:flex-row gap-2 max-w-3xl mx-auto mt-6">
+        <input
+          id="search-input"
+          type="text"
+          oninput="filterJobs()"
+          placeholder="ابحث بالمسمى الوظيفي، التخصص، اسم الشركة، أو المدينة..."
+          class="flex-1 px-4 py-3 text-slate-800 rounded-xl focus:outline-none text-sm md:text-base"
+        />
+        <select
+          id="type-filter"
+          onchange="filterJobs()"
+          class="bg-purple-50 text-purple-900 px-4 py-3 rounded-xl font-semibold text-sm focus:outline-none cursor-pointer"
+        >
+          <option value="الكل">كل أنواع الدوام</option>
+          <option value="دوام كامل">دوام كامل</option>
+          <option value="عن بُعد">عمل عن بُعد (Remote)</option>
+        </select>
       </div>
-
     </div>
   </section>
 
   <!-- المحتوى الرئيسي -->
-  <main class="max-w-6xl mx-auto px-4 md:px-6 py-10 flex-1 w-full">
-    
+  <main class="max-w-6xl mx-auto px-4 py-8 flex-1 w-full">
     <!-- شريط التصنيفات -->
-    <div class="mb-8">
-      <div class="text-xs font-mono-code text-pewter uppercase mb-3">TAXONOMY / تصنيف الوظائف</div>
-      <div id="category-bar" class="flex items-center gap-2 overflow-x-auto pb-3"></div>
-    </div>
+    <div id="category-bar" class="flex items-center gap-2 overflow-x-auto pb-4 mb-6 border-b border-purple-200"></div>
 
     <!-- عداد الوظائف -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 mb-6 border-b border-stone">
-      <p id="jobs-count" class="text-base font-medium text-forest">جاري تحميل الوظائف المرصودة...</p>
-      <span class="font-mono-code text-xs text-pewter">INDEX STATUS: ACTIVESYNC</span>
+    <div class="flex items-center justify-between mb-4">
+      <p id="jobs-count" class="text-sm font-bold text-purple-900">جاري تحميل الوظائف المرصودة...</p>
+      <span class="text-xs text-slate-500">تحديث تلقائي مستمر</span>
     </div>
 
     <!-- حاوية البطاقات -->
-    <div id="jobs-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-
+    <div id="jobs-container" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
   </main>
 
   <!-- الفوتر -->
-  <footer class="bg-forest py-12 px-4 md:px-6 mt-12">
-    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs opacity-80">
-      <div class="flex items-center gap-2">
-        <span class="font-medium text-base">مرصد الوظائف | MarsadJobs</span>
-        <span class="w-2 h-2 rounded-full bg-lime inline-block"></span>
-      </div>
-      <p class="font-light text-center">
-        © 2026 جميع الحقوق محفوظة — يعمل بنظام الرصد التلقائي الذكي
-      </p>
-    </div>
+  <footer class="bg-purple-950 text-purple-300 text-center py-6 text-xs border-t border-purple-900 mt-12">
+    <p>© 2026 مرصد الوظائف (MarsadJobs) - جميع الحقوق محفوظة | يعمل بنظام الرصد التلقائي الذكي</p>
   </footer>
 
   <script>
+    // إعدادات الاتصال الآمن بقاعدة البيانات
     const SUPABASE_URL = 'https://hsomjtpoqmtymuvzymik.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_MJC4wJAIVMs1O-c0H89qag_ivW0BoUm';
 
@@ -251,19 +120,18 @@
 
     function renderCategories() {
       const bar = document.getElementById('category-bar');
-      bar.innerHTML = CATEGORIES.map(cat => {
-        const isActive = currentCategory === cat;
-        return `
-          <button
-            onclick="selectCategory('${cat}')"
-            class="whitespace-nowrap text-sm transition ${
-              isActive ? 'btn-primary' : 'btn-outline'
-            }"
-          >
-            ${cat}
-          </button>
-        `;
-      }).join('');
+      bar.innerHTML = CATEGORIES.map(cat => `
+        <button
+          onclick="selectCategory('${cat}')"
+          class="whitespace-nowrap px-4 py-2 rounded-xl text-sm font-bold transition ${
+            currentCategory === cat
+              ? 'bg-purple-900 text-white shadow'
+              : 'bg-white text-purple-900 hover:bg-purple-100 border border-purple-200'
+          }"
+        >
+          ${cat}
+        </button>
+      `).join('');
     }
 
     function selectCategory(cat) {
@@ -280,7 +148,7 @@
     async function loadJobsFromDB() {
       const container = document.getElementById('jobs-container');
       const countEl = document.getElementById('jobs-count');
-      container.innerHTML = '<div class="col-span-full text-center py-16 text-pewter font-light text-lg">⏳ جاري رصد وتحميل أحدث الوظائف...</div>';
+      container.innerHTML = '<div class="col-span-full text-center py-16 text-purple-800 font-bold">⏳ جاري رصد وتحميل أحدث الوظائف...</div>';
 
       const { data, error } = await supabaseClient
         .from('jobs')
@@ -290,7 +158,7 @@
         .limit(600);
 
       if (error) {
-        container.innerHTML = '<div class="col-span-full bg-stone p-8 card-radius text-center font-medium">تعذر تحميل الوظائف حالياً، يرجى المحاولة لاحقاً.</div>';
+        container.innerHTML = `<div class="col-span-full bg-red-50 text-red-700 p-6 rounded-2xl text-center font-bold">تعذر تحميل الوظائف، يرجى المحاولة لاحقاً.</div>`;
         countEl.textContent = 'خطأ في الاتصال';
         return;
       }
@@ -315,66 +183,56 @@
         return matchCat && matchType && matchSearch;
       });
 
-      countEl.textContent = 'تم رصد ' + filtered.length + ' فرصة عمل متاحة';
+      countEl.textContent = `تم رصد ${filtered.length} فرصة عمل متاحة`;
 
       if (filtered.length === 0) {
         container.innerHTML = `
-          <div class="col-span-full bg-stone card-radius p-12 text-center">
-            <p class="text-xl font-light text-forest">لا توجد وظائف مطابقة لهذا الفلتر حالياً</p>
-            <p class="text-sm text-pewter mt-2">جرب اختيار تصنيف "الكل" أو مسح كلمة البحث</p>
+          <div class="col-span-full bg-white rounded-2xl p-12 text-center border-2 border-purple-300 shadow-sm">
+            <p class="text-lg font-bold text-purple-900">لا توجد وظائف مطابقة لهذا الفلتر حالياً</p>
+            <p class="text-sm text-slate-500 mt-1">جرب اختيار تصنيف "الكل" أو مسح كلمة البحث</p>
           </div>
         `;
         return;
       }
 
-      container.innerHTML = filtered.map((job, idx) => {
+      container.innerHTML = filtered.map(job => {
         const dateStr = job.published_at ? new Date(job.published_at).toLocaleDateString('ar-EG') : 'حديثاً';
-        const specimenCode = 'JB-' + String(idx + 1).padStart(3, '0');
         return `
-          <div class="job-card flex flex-col justify-between">
+          <div class="bg-white p-6 rounded-2xl border-2 border-purple-200 hover:border-purple-600 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between gap-2 mb-3">
-                <div class="flex items-center gap-2">
-                  <span class="font-mono-code text-xs border border-forest text-forest px-2.5 py-0.5 pill">
-                    ${specimenCode}
-                  </span>
-                  <span class="text-xs font-medium bg-lime px-3 py-1 pill">
-                    ${job.category || 'عام'}
-                  </span>
-                </div>
-                <span class="text-xs text-pewter border border-ash px-2.5 py-0.5 pill">
+                <span class="text-xs font-bold bg-fuchsia-50 text-fuchsia-800 px-3 py-1 rounded-lg border border-fuchsia-200">
+                  ${job.category || 'عام'}
+                </span>
+                <span class="text-xs font-medium bg-purple-50 text-purple-700 px-2.5 py-1 rounded-md">
                   ${job.job_type || 'دوام كامل'}
                 </span>
               </div>
-
-              <h3 class="text-xl font-normal text-forest mb-1.5 leading-snug" dir="auto">
-                ${job.title}
-              </h3>
-
-              <p class="text-sm font-medium text-forest mb-3" dir="auto">
-                🏢 ${job.company} &nbsp;—&nbsp; <span class="text-pewter">📍 ${job.location}</span>
+              <h3 class="text-lg font-extrabold text-slate-900 mb-1.5 leading-snug" dir="auto">${job.title}</h3>
+              <p class="text-sm font-bold text-slate-700 mb-3" dir="auto">
+                🏢 ${job.company} &nbsp;•&nbsp; 📍 ${job.location}
               </p>
-
-              <p class="text-xs text-pewter line-clamp-2 mb-5 leading-relaxed" dir="auto">
+              <p class="text-xs text-slate-500 line-clamp-2 mb-4 leading-relaxed" dir="auto">
                 ${job.description || ''}
               </p>
             </div>
+            
+            <!-- سطر المعلومات السفلي مرتب ونظيف بدون إطارات مزعجة -->
+            <div class="flex items-center justify-between pt-3 border-t border-purple-100 mt-2 text-xs text-slate-600">
+              <span>📅 ${dateStr}</span>
+              <span>المصدر: <strong class="text-purple-900">${job.source || 'غير محدد'}</strong></span>
+              <span class="text-fuchsia-700 font-bold">👁 <span id="views-${job.id}">${job.views || 0}</span> مشاهدة</span>
+            </div>
 
-            <div class="pt-4 border-t border-frosted flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div class="flex flex-wrap items-center justify-between sm:justify-start gap-4 text-xs text-pewter font-mono-code">
-                <span>📅 ${dateStr}</span>
-                <span>المصدر: <strong class="text-forest">${job.source || 'مباشر'}</strong></span>
-                <span class="text-forest">👁 <strong id="views-${job.id}">${job.views || 0}</strong> مشاهدة</span>
-              </div>
-
+            <div class="mt-4 flex justify-end">
               <a
                 href="${job.apply_url}"
                 target="_blank"
                 rel="noopener noreferrer"
                 onclick="trackView('${job.id}')"
-                class="btn-primary text-xs md:text-sm text-center shrink-0"
+                class="bg-purple-900 hover:bg-fuchsia-700 text-white text-xs md:text-sm font-bold px-5 py-2.5 rounded-xl transition shadow-sm inline-block text-center w-full sm:w-auto"
               >
-                التقديم الآن ←
+                التقديم الآن ↗
               </a>
             </div>
           </div>
