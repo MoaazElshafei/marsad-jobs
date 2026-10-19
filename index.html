@@ -62,8 +62,10 @@
       <h2 class="text-2xl md:text-4xl font-extrabold leading-relaxed">
         ابحث عن فرصة عملك في مصر في <span class="text-emerald-400">ثوانٍ معدودة</span>
       </h2>
+      
+      <!-- تم تعديل الجملة هنا -->
       <p class="text-slate-300 text-sm md:text-base max-w-2xl mx-auto">
-        يجمع مرصد الوظائف أحدث الفرص الوظيفية المتاحة في السوق المصري ويصنفها لك تلقائياً
+        يجمع مرصد أحدث الوظائف المتاحة في السوق المصري ويصنفها لك تلقائياً
       </p>
 
       <!-- شريط البحث والفلاتر -->
@@ -75,7 +77,6 @@
           placeholder="ابحث بالمسمى الوظيفي، التخصص، اسم الشركة، أو المدينة..."
           class="flex-1 px-4 py-3 text-slate-800 rounded-xl focus:outline-none text-sm md:text-base"
         />
-        <!-- تم التعديل هنا في خيارات القائمة المنسدلة -->
         <select
           id="type-filter"
           onchange="filterJobs()"
@@ -195,7 +196,6 @@
       const filtered = allJobs.filter(job => {
         const matchCat = currentCategory === 'الكل' || job.category === currentCategory;
         
-        // تحديث الفلترة لتتوافق مع الكلمات الجديدة في القائمة
         let matchType = true;
         if (typeFilter === 'دوام كامل') {
           matchType = job.job_type && job.job_type.includes('دوام كامل');
@@ -226,7 +226,6 @@
         const dateStr = job.published_at ? new Date(job.published_at).toLocaleDateString('ar-EG') : 'حديثاً';
         const viewsCount = job.views || 0;
         
-        // تغيير النص الذي يظهر على كرت الوظيفة من "دوام كامل" إلى "وظيفة كاملة"
         let displayJobType = job.job_type || 'وظيفة كاملة';
         if (displayJobType === 'دوام كامل') {
             displayJobType = 'وظيفة كاملة';
