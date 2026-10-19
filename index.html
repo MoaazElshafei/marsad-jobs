@@ -3,288 +3,248 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>لوحة التحكم والتحليلات | مرصد الوظائف</title>
+  <title>مرصد الوظائف | MarsadJobs - وظائف مصر والوطن العربي</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Cairo', sans-serif; }
   </style>
 </head>
-<body class="bg-purple-50/40 text-slate-900 min-h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
 
-  <!-- الهيدر -->
-  <header class="bg-purple-950 text-white border-b border-purple-900 sticky top-0 z-30 shadow-md">
-    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+  <!-- الهيدر وشريط التنقل -->
+  <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 shadow-md">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="flex items-center gap-3">
-        <span class="bg-fuchsia-600 text-white font-black px-3.5 py-2 rounded-xl text-base shadow">
-          إدارة مرصد
+        <span class="bg-emerald-500 text-slate-950 font-black px-3.5 py-1.5 rounded-xl text-xl shadow">
+          مرصد
         </span>
-        <h1 class="text-lg md:text-xl font-extrabold">لوحة التحكم والتحليلات</h1>
+        <div>
+          <h1 class="text-xl font-bold tracking-wide">مرصد الوظائف | MarsadJobs</h1>
+          <p class="text-xs text-slate-400">رصد آلي لحظي لوظائف مصر على مدار الساعة</p>
+        </div>
       </div>
-      <a href="index.html" class="bg-purple-900 hover:bg-fuchsia-600 border border-purple-700 text-white font-bold px-4 py-2 rounded-xl text-xs md:text-sm transition">
-        عرض الموقع العام ↗
-      </a>
+
+      <!-- زر لوحة التحكم السريع والدول -->
+      <div class="flex items-center gap-3">
+        <a href="admin.html" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-3.5 py-1.5 rounded-xl text-xs transition shadow flex items-center gap-1">
+          ⚙️ لوحة التحكم
+        </a>
+        <div class="flex items-center gap-2 overflow-x-auto" id="country-buttons">
+          <button onclick="selectCountry('EG')" data-country="EG" class="country-btn bg-emerald-500 text-slate-950 font-bold px-3.5 py-1.5 rounded-full text-sm flex items-center gap-1.5 shadow transition">
+            <span>🇪🇬</span><span>مصر</span>
+          </button>
+        </div>
+      </div>
     </div>
   </header>
 
-  <main class="max-w-6xl mx-auto px-4 py-8 flex-1 w-full space-y-8">
-
-    <!-- الكروت الإحصائية العلوية -->
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-      <div class="bg-white p-5 rounded-2xl border-2 border-purple-100 shadow-sm">
-        <p class="text-xs font-bold text-slate-500 mb-1">إجمالي الوظائف الحالية</p>
-        <p id="stat-total-jobs" class="text-2xl md:text-3xl font-black text-slate-900">...</p>
+  <!-- قسم البحث الرئيسي -->
+  <section class="bg-gradient-to-b from-slate-900 to-slate-800 text-white py-12 px-4 shadow-inner">
+    <div class="max-w-4xl mx-auto text-center space-y-5">
+      <div class="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-3 py-1 rounded-full text-xs font-semibold">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+        يعمل بالرصد التلقائي الذكي دون وسطاء
       </div>
+      <h2 class="text-2xl md:text-4xl font-extrabold leading-relaxed">
+        ابحث عن فرصة عملك في مصر في <span class="text-emerald-400">ثوانٍ معدودة</span>
+      </h2>
+      <p class="text-slate-300 text-sm md:text-base max-w-2xl mx-auto">
+        يجمع مرصد الوظائف أحدث الفرص الوظيفية المتاحة في السوق المصري ويصنفها لك تلقائياً
+      </p>
 
-      <div class="bg-white p-5 rounded-2xl border-2 border-purple-100 shadow-sm">
-        <p class="text-xs font-bold text-slate-500 mb-1">إجمالي مشاهدات الوظائف</p>
-        <p id="stat-total-views" class="text-2xl md:text-3xl font-black text-fuchsia-600">...</p>
-      </div>
-
-      <div class="bg-white p-5 rounded-2xl border-2 border-purple-100 shadow-sm">
-        <p class="text-xs font-bold text-slate-500 mb-1">إجمالي زيارات الموقع</p>
-        <p id="stat-total-visits" class="text-2xl md:text-3xl font-black text-purple-900">...</p>
-      </div>
-
-      <div class="bg-white p-5 rounded-2xl border-2 border-purple-100 shadow-sm">
-        <p class="text-xs font-bold text-slate-500 mb-1">دول الزوار المرصودة</p>
-        <p id="stat-countries-count" class="text-2xl md:text-3xl font-black text-emerald-600">...</p>
-      </div>
-
-      <div class="bg-white p-5 rounded-2xl border-2 border-purple-100 shadow-sm">
-        <p class="text-xs font-bold text-slate-500 mb-1">التخصصات النشطة</p>
-        <p id="stat-categories" class="text-2xl md:text-3xl font-black text-blue-600">...</p>
-      </div>
-
-      <div class="bg-white p-5 rounded-2xl border-2 border-purple-100 shadow-sm">
-        <p class="text-xs font-bold text-slate-500 mb-1">المصادر المتاحة</p>
-        <p id="stat-sources" class="text-2xl md:text-3xl font-black text-purple-600">...</p>
-      </div>
-    </div>
-
-    <!-- قسم الرسوم البيانية -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- رسم بياني للزيارات حسب الدولة -->
-      <div class="bg-white p-6 rounded-2xl border-2 border-purple-100 shadow-sm">
-        <h2 class="text-base font-extrabold text-purple-950 mb-4">🌍 توزيع الزيارات حسب الدولة</h2>
-        <div class="h-64 flex items-center justify-center">
-          <canvas id="countriesChart"></canvas>
-        </div>
-      </div>
-
-      <!-- رسم بياني للمشاهدات حسب التخصص -->
-      <div class="bg-white p-6 rounded-2xl border-2 border-purple-100 shadow-sm">
-        <h2 class="text-base font-extrabold text-purple-950 mb-4">📊 مشاهدات الوظائف حسب التخصص</h2>
-        <div class="h-64 flex items-center justify-center">
-          <canvas id="viewsByCategoryChart"></canvas>
-        </div>
+      <!-- شريط البحث والفلاتر -->
+      <div class="bg-white p-2 rounded-2xl shadow-xl flex flex-col md:flex-row gap-2 max-w-3xl mx-auto mt-6">
+        <input
+          id="search-input"
+          type="text"
+          oninput="filterJobs()"
+          placeholder="ابحث بالمسمى الوظيفي، التخصص، اسم الشركة، أو المدينة..."
+          class="flex-1 px-4 py-3 text-slate-800 rounded-xl focus:outline-none text-sm md:text-base"
+        />
+        <select
+          id="type-filter"
+          onchange="filterJobs()"
+          class="bg-slate-100 text-slate-700 px-4 py-3 rounded-xl font-semibold text-sm focus:outline-none cursor-pointer"
+        >
+          <option value="الكل">كل أنواع الدوام</option>
+          <option value="دوام كامل">دوام كامل</option>
+          <option value="عن بُعد">عمل عن بُعد (Remote)</option>
+        </select>
       </div>
     </div>
+  </section>
 
-    <!-- الجداول التفصيلية للتقارير -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      
-      <!-- جدول الدول الأكثر زيارة -->
-      <div class="bg-white p-6 rounded-2xl border-2 border-purple-100 shadow-sm">
-        <h2 class="text-base font-extrabold text-purple-950 mb-4">🚩 تقرير الزيارات حسب البلد</h2>
-        <div class="overflow-x-auto">
-          <table class="w-full text-right text-sm">
-            <thead>
-              <tr class="border-b border-purple-100 text-slate-500">
-                <th class="pb-3 font-bold">البلد</th>
-                <th class="pb-3 font-bold">عدد الزيارات</th>
-                <th class="pb-3 font-bold">النسبة</th>
-              </tr>
-            </thead>
-            <tbody id="countries-table-body" class="divide-y divide-purple-50">
-              <tr><td colspan="3" class="py-4 text-center text-slate-400">جاري تحميل بيانات الدول...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+  <!-- المحتوى الرئيسي -->
+  <main class="max-w-6xl mx-auto px-4 py-8 flex-1 w-full">
+    <!-- شريط التصنيفات -->
+    <div id="category-bar" class="flex items-center gap-2 overflow-x-auto pb-4 mb-6 border-b border-slate-200"></div>
 
-      <!-- جدول أعلى الوظائف مشاهدة -->
-      <div class="bg-white p-6 rounded-2xl border-2 border-purple-100 shadow-sm">
-        <h2 class="text-base font-extrabold text-purple-950 mb-4">🔥 أكثر الوظائف مشاهدة وتفاعلاً</h2>
-        <div class="overflow-x-auto">
-          <table class="w-full text-right text-sm">
-            <thead>
-              <tr class="border-b border-purple-100 text-slate-500">
-                <th class="pb-3 font-bold">المسمى الوظيفي</th>
-                <th class="pb-3 font-bold">المصدر</th>
-                <th class="pb-3 font-bold">المشاهدات</th>
-              </tr>
-            </thead>
-            <tbody id="top-jobs-table-body" class="divide-y divide-purple-50">
-              <tr><td colspan="3" class="py-4 text-center text-slate-400">جاري تحميل الوظائف...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
+    <!-- عداد الوظائف -->
+    <div class="flex items-center justify-between mb-4">
+      <p id="jobs-count" class="text-sm font-bold text-slate-600">جاري تحميل الوظائف المرصودة...</p>
+      <span class="text-xs text-slate-400">تحديث تلقائي مستمر</span>
     </div>
 
+    <!-- حاوية البطاقات -->
+    <div id="jobs-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
   </main>
 
-  <footer class="bg-purple-950 text-purple-300 text-center py-6 text-xs border-t border-purple-900 mt-12">
-    <p>© 2026 لوحة تحليلات مرصد الوظائف (MarsadJobs)</p>
+  <!-- الفوتر -->
+  <footer class="bg-slate-900 text-slate-400 text-center py-6 text-xs border-t border-slate-800 mt-12">
+    <p>© 2026 مرصد الوظائف (MarsadJobs) - جميع الحقوق محفوظة | يعمل بنظام الرصد التلقائي الذكي</p>
   </footer>
 
   <script>
+    // إعدادات الاتصال الآمن بقاعدة البيانات
     const SUPABASE_URL = 'https://hsomjtpoqmtymuvzymik.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_MJC4wJAIVMs1O-c0H89qag_ivW0BoUm';
+
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    async function loadAnalytics() {
-      // 1. جلب بيانات الوظائف والمشاهدات
-      const { data: jobs, error: jobsErr } = await supabaseClient
+    const CATEGORIES = [
+      'الكل',
+      'مبيعات وعقارات',
+      'تكنولوجيا ومعلومات',
+      'محاسبة ومالية',
+      'هندسة وإنشاءات',
+      'تسويق وصناعة محتوى',
+      'إدارة وخدمة عملاء',
+      'وظائف متنوعة'
+    ];
+
+    let allJobs = [];
+    let currentCountry = 'EG';
+    let currentCategory = 'الكل';
+
+    function renderCategories() {
+      const bar = document.getElementById('category-bar');
+      bar.innerHTML = CATEGORIES.map(cat => `
+        <button
+          onclick="selectCategory('${cat}')"
+          class="whitespace-nowrap px-4 py-2 rounded-xl text-sm font-bold transition ${
+            currentCategory === cat
+              ? 'bg-slate-900 text-white shadow'
+              : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+          }"
+        >
+          ${cat}
+        </button>
+      `).join('');
+    }
+
+    function selectCategory(cat) {
+      currentCategory = cat;
+      renderCategories();
+      filterJobs();
+    }
+
+    function selectCountry(code) {
+      currentCountry = code;
+      loadJobsFromDB();
+    }
+
+    async function loadJobsFromDB() {
+      const container = document.getElementById('jobs-container');
+      const countEl = document.getElementById('jobs-count');
+      container.innerHTML = '<div class="col-span-full text-center py-16 text-slate-500 font-bold">⏳ جاري رصد وتحميل أحدث الوظائف...</div>';
+
+      const { data, error } = await supabaseClient
         .from('jobs')
-        .select('*');
+        .select('*')
+        .eq('country_code', currentCountry)
+        .order('published_at', { ascending: false })
+        .limit(600);
 
-      // 2. جلب بيانات زيارات الموقع والدول
-      const { data: visits, error: visitsErr } = await supabaseClient
-        .from('site_visits')
-        .select('*');
-
-      const allJobs = jobs || [];
-      const allVisits = visits || [];
-
-      // حساب الإحصائيات العامة
-      const totalJobs = allJobs.length;
-      const totalJobViews = allJobs.reduce((sum, j) => sum + (Number(j.views) || 0), 0);
-      const totalSiteVisits = allVisits.length;
-
-      const uniqueCategories = new Set(allJobs.map(j => j.category).filter(Boolean));
-      const uniqueSources = new Set(allJobs.map(j => j.source).filter(Boolean));
-
-      // تجميع الزيارات حسب البلد
-      const countryCounts = {};
-      allVisits.forEach(v => {
-        const c = v.country_name || 'غير محدد';
-        countryCounts[c] = (countryCounts[c] || 0) + 1;
-      });
-      const uniqueCountriesCount = Object.keys(countryCounts).length;
-
-      // تحديث الأرقام في الكروت
-      document.getElementById('stat-total-jobs').textContent = totalJobs;
-      document.getElementById('stat-total-views').textContent = totalJobViews;
-      document.getElementById('stat-total-visits').textContent = totalSiteVisits;
-      document.getElementById('stat-countries-count').textContent = uniqueCountriesCount;
-      document.getElementById('stat-categories').textContent = uniqueCategories.size;
-      document.getElementById('stat-sources').textContent = uniqueSources.size;
-
-      // تحديث جدول الدول
-      const countriesTbody = document.getElementById('countries-table-body');
-      const sortedCountries = Object.entries(countryCounts).sort((a, b) => b[1] - a[1]);
-
-      if (sortedCountries.length === 0) {
-        countriesTbody.innerHTML = `<tr><td colspan="3" class="py-4 text-center text-slate-400">لا توجد زيارات مسجلة بعد</td></tr>`;
-      } else {
-        countriesTbody.innerHTML = sortedCountries.map(([country, count]) => {
-          const percent = totalSiteVisits > 0 ? ((count / totalSiteVisits) * 100).toFixed(1) : 0;
-          return `
-            <tr>
-              <td class="py-3 font-bold text-slate-800">${country}</td>
-              <td class="py-3 font-bold text-purple-900">${count} زيارة</td>
-              <td class="py-3 text-fuchsia-700 font-bold">${percent}%</td>
-            </tr>
-          `;
-        }).join('');
+      if (error) {
+        container.innerHTML = `<div class="col-span-full bg-red-50 text-red-700 p-6 rounded-2xl text-center font-bold">تعذر تحميل الوظائف، يرجى المحاولة لاحقاً.</div>`;
+        countEl.textContent = 'خطأ في الاتصال';
+        return;
       }
 
-      // تحديث جدول أكثر الوظائف مشاهدة
-      const topJobsTbody = document.getElementById('top-jobs-table-body');
-      const sortedJobsByViews = [...allJobs].sort((a, b) => (Number(b.views) || 0) - (Number(a.views) || 0)).slice(0, 7);
-
-      if (sortedJobsByViews.length === 0) {
-        topJobsTbody.innerHTML = `<tr><td colspan="3" class="py-4 text-center text-slate-400">لا توجد بيانات</td></tr>`;
-      } else {
-        topJobsTbody.innerHTML = sortedJobsByViews.map(job => `
-          <tr>
-            <td class="py-3 font-bold text-slate-800 line-clamp-1" dir="auto">${job.title}</td>
-            <td class="py-3 text-slate-500 text-xs">${job.source || '-'}</td>
-            <td class="py-3 font-extrabold text-fuchsia-700">👁 ${job.views || 0}</td>
-          </tr>
-        `).join('');
-      }
-
-      // إعداد الرسم البياني للدول (Doughnut Chart)
-      const countryLabels = sortedCountries.length ? sortedCountries.map(c => c[0]) : ['لا توجد زيارات بعد'];
-      const countryData = sortedCountries.length ? sortedCountries.map(c => c[1]) : [1];
-
-      new Chart(document.getElementById('countriesChart'), {
-        type: 'doughnut',
-        data: {
-          labels: countryLabels,
-          datasets: [{
-            data: countryData,
-            backgroundColor: ['#581c87', '#c026d3', '#9333ea', '#e879f9', '#3b0764', '#f0abfc']
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { position: 'bottom', labels: { font: { family: 'Cairo' } } }
-          }
-        }
-      });
-
-      // إعداد الرسم البياني للمشاهدات حسب التخصص (Bar Chart)
-      const catViews = {};
-      allJobs.forEach(j => {
-        const cat = j.category || 'عام';
-        catViews[cat] = (catViews[cat] || 0) + (Number(j.views) || 0);
-      });
-
-      new Chart(document.getElementById('viewsByCategoryChart'), {
-        type: 'bar',
-        data: {
-          labels: Object.keys(catViews),
-          datasets: [{
-            label: 'عدد المشاهدات',
-            data: Object.values(catViews),
-            backgroundColor: '#701a75',
-            borderRadius: 8
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false }
-          },
-          scales: {
-            x: { ticks: { font: { family: 'Cairo' } } },
-            y: { beginAtZero: true }
-          }
-        }
-      });
+      allJobs = data || [];
+      filterJobs();
     }
 
-    loadAnalytics();
-        // تسجيل زيارة الموقع والبلد تلقائياً
-    async function logSiteVisit() {
-      if (sessionStorage.getItem('marsad_visit_logged')) return;
+    function filterJobs() {
+      const query = document.getElementById('search-input').value.toLowerCase();
+      const typeFilter = document.getElementById('type-filter').value;
+      const container = document.getElementById('jobs-container');
+      const countEl = document.getElementById('jobs-count');
+
+      const filtered = allJobs.filter(job => {
+        const matchCat = currentCategory === 'الكل' || job.category === currentCategory;
+        const matchType = typeFilter === 'الكل' || (job.job_type && job.job_type.includes(typeFilter));
+        const matchSearch =
+          (job.title || '').toLowerCase().includes(query) ||
+          (job.company || '').toLowerCase().includes(query) ||
+          (job.location || '').toLowerCase().includes(query);
+        return matchCat && matchType && matchSearch;
+      });
+
+      countEl.textContent = `تم رصد ${filtered.length} فرصة عمل متاحة`;
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full bg-white rounded-2xl p-12 text-center border border-slate-200">
+            <p class="text-lg font-bold text-slate-700">لا توجد وظائف مطابقة لهذا الفلتر حالياً</p>
+            <p class="text-sm text-slate-500 mt-1">جرب اختيار تصنيف "الكل" أو مسح كلمة البحث</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(job => {
+        const dateStr = job.published_at ? new Date(job.published_at).toLocaleDateString('ar-EG') : 'حديثاً';
+        return `
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 hover:border-emerald-500 hover:shadow-lg transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="text-xs font-bold bg-emerald-50 text-emerald-700 px-3 py-1 rounded-lg border border-emerald-200">
+                  ${job.category || 'عام'}
+                </span>
+                <span class="text-xs font-medium bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md">
+                  ${job.job_type || 'دوام كامل'}
+                </span>
+              </div>
+              <h3 class="text-lg font-extrabold text-slate-900 mb-1.5 leading-snug" dir="auto">${job.title}</h3>
+              <p class="text-sm font-bold text-slate-600 mb-3" dir="auto">
+                🏢 ${job.company} &nbsp;•&nbsp; 📍 ${job.location}
+              </p>
+              <p class="text-xs text-slate-500 line-clamp-2 mb-4 leading-relaxed" dir="auto">
+                ${job.description || ''}
+              </p>
+            </div>
+            <div class="flex items-center justify-between pt-3 border-t border-slate-100 mt-2">
+              <span class="text-xs text-slate-400">📅 ${dateStr} • المصدر: ${job.source} • 👁 <span id="views-${job.id}">${job.views || 0}</span></span>
+              <a
+                href="${job.apply_url}"
+                target="_blank"
+                rel="noopener noreferrer"
+                onclick="trackView('${job.id}')"
+                class="bg-slate-900 hover:bg-emerald-600 text-white text-xs md:text-sm font-bold px-4 py-2 rounded-xl transition shadow-sm"
+              >
+                التقديم الآن ↗
+              </a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function trackView(id) {
       try {
-        const res = await fetch('https://ipapi.co/json/');
-        const geo = await res.json();
-        await supabaseClient.from('site_visits').insert([{
-          country_name: geo.country_name || 'مصر',
-          country_code: geo.country_code || 'EG'
-        }]);
-        sessionStorage.setItem('marsad_visit_logged', 'true');
-      } catch (e) {
-        await supabaseClient.from('site_visits').insert([{
-          country_name: 'مصر',
-          country_code: 'EG'
-        }]);
-      }
+        const { data } = await supabaseClient.rpc('increment_job_views', { job_id: id });
+        const el = document.getElementById('views-' + id);
+        if (el && typeof data === 'number') el.textContent = data;
+        const job = allJobs.find(j => j.id === id);
+        if (job && typeof data === 'number') job.views = data;
+      } catch (e) {}
     }
-    logSiteVisit();
 
+    renderCategories();
+    loadJobsFromDB();
   </script>
 </body>
 </html>
