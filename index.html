@@ -217,11 +217,12 @@
               </p>
             </div>
             <div class="flex items-center justify-between pt-3 border-t border-slate-100 mt-2">
-              <span class="text-xs text-slate-400">📅 ${dateStr} • المصدر: ${job.source}</span>
+              <span class="text-xs text-slate-400">📅 ${dateStr} • المصدر: ${job.source} • 👁 <span id="views-${job.id}">${job.views || 0}</span></span>
               <a
                 href="${job.apply_url}"
                 target="_blank"
                 rel="noopener noreferrer"
+                onclick="trackView('${job.id}')"
                 class="bg-slate-900 hover:bg-emerald-600 text-white text-xs md:text-sm font-bold px-4 py-2 rounded-xl transition shadow-sm"
               >
                 التقديم الآن ↗
@@ -230,6 +231,16 @@
           </div>
         `;
       }).join('');
+    }
+
+    async function trackView(id) {
+      try {
+        const { data } = await supabaseClient.rpc('increment_job_views', { job_id: id });
+        const el = document.getElementById('views-' + id);
+        if (el && typeof data === 'number') el.textContent = data;
+        const job = allJobs.find(j => j.id === id);
+        if (job && typeof data === 'number') job.views = data;
+      } catch (e) {}
     }
 
     renderCategories();
