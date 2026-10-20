@@ -184,7 +184,6 @@
       modal.classList.remove('flex');
     }
 
-    // إغلاق النافذة عند الضغط خارجها
     document.getElementById('contact-modal').addEventListener('click', function(e) {
       if (e.target === this) closeContactModal();
     });
@@ -241,12 +240,12 @@
       container.innerHTML = '<div class="col-span-full text-center py-12 text-[#4c1d95] font-bold text-sm">⏳ جاري رصد وتحميل أحدث الوظائف...</div>';
       countEl.textContent = 'جاري تحميل الوظائف...';
 
+      // تم إزالة .limit(600) هنا لجلب كل الوظائف بدون حد أقصى
       const { data, error } = await supabaseClient
         .from('jobs')
         .select('*')
         .eq('country_code', currentCountry)
-        .order('published_at', { ascending: false })
-        .limit(600);
+        .order('published_at', { ascending: false });
 
       if (error) {
         container.innerHTML = `<div class="col-span-full bg-red-50 text-red-700 p-4 rounded-2xl text-center font-bold text-sm">تعذر تحميل الوظائف، يرجى المحاولة لاحقاً.</div>`;
@@ -281,6 +280,7 @@
         return matchCat && matchType && matchSearch;
       });
 
+      // سيعرض العدد الصحيح (812 أو غيره)
       countEl.textContent = `تم رصد ${filtered.length} فرصة عمل متاحة`;
 
       if (filtered.length === 0) {
