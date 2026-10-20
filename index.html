@@ -55,7 +55,7 @@
         ابحث عن فرصة عملك في مصر في <span class="text-[#f0abfc]">ثوانٍ معدودة</span>
       </h2>
       <p class="text-slate-300 text-sm md:text-base max-w-2xl mx-auto">
-        يجمع مرصد الوظائف أحدث الفرص الوظيفية المتاحة في السوق المصري ويصنفها لك تلقائياً
+        يجمع مرصد أحدث الفرص الوظيفية المتاحة في السوق المصري ويصنفها لك تلقائياً
       </p>
 
       <!-- شريط البحث والفلاتر -->
@@ -72,7 +72,7 @@
           onchange="filterJobs()"
           class="bg-slate-100 text-slate-700 px-4 py-3 rounded-xl font-semibold text-sm focus:outline-none cursor-pointer"
         >
-          <option value="الكل">كل أنواع الدوام</option>
+          <option value="الكل">كل الوظائف</option>
           <option value="دوام كامل">دوام كامل</option>
           <option value="عن بُعد">عمل عن بُعد (Remote)</option>
         </select>
@@ -154,12 +154,21 @@
       const countEl = document.getElementById('jobs-count');
       container.innerHTML = '<div class="col-span-full text-center py-16 text-slate-500 font-bold">⏳ جاري رصد وتحميل أحدث الوظائف...</div>';
 
-      const { data, error } = await supabaseClient
-        .from('jobs')
-        .select('*')
-        .eq('country_code', currentCountry)
-        .order('published_at', { ascending: false })
-        .limit(600);
+      // Supabase يرجّع 1000 صف كحد أقصى في الطلب الواحد، فبنجيب على دفعات
+      const PAGE = 1000;
+      let data = [];
+      let error = null;
+      for (let from = 0; ; from += PAGE) {
+        const res = await supabaseClient
+          .from('jobs')
+          .select('*')
+          .eq('country_code', currentCountry)
+          .order('published_at', { ascending: false })
+          .range(from, from + PAGE - 1);
+        if (res.error) { error = res.error; break; }
+        data = data.concat(res.data || []);
+        if (!res.data || res.data.length < PAGE) break;
+      }
 
       if (error) {
         container.innerHTML = `<div class="col-span-full bg-red-50 text-red-700 p-6 rounded-2xl text-center font-bold">تعذر تحميل الوظائف، يرجى المحاولة لاحقاً.</div>`;
@@ -200,7 +209,7 @@
       }
 
       container.innerHTML = filtered.map(job => {
-        const dateStr = job.published_at ? new Date(job.published_at).toLocaleDateString('ar-EG') : 'حديثاً';
+        const dateStr = job.published_at ? new Date(job.published_at).toLocaleDateString('en-GB') : 'حديثاً';
         return `
           <div class="bg-white p-5 rounded-2xl border border-slate-200 hover:border-[#a855f7] hover:shadow-lg transition flex flex-col justify-between">
             <div>
@@ -221,7 +230,11 @@
               </p>
             </div>
             <div class="flex items-center justify-between pt-3 border-t border-slate-100 mt-2">
-              <span class="text-xs text-slate-400">📅 ${dateStr} • المصدر: ${job.source} • 👁 <span id="views-${job.id}">${job.views || 0}</span></span>
+              <div class="flex items-center justify-between flex-wrap gap-x-5 gap-y-2 text-xs text-slate-400">
+                <span>📅 ${dateStr}</span>
+                <span>👁 <span id="views-${job.id}">${job.views || 0}</span> views</span>
+                <span>المصدر: ${job.source}</span>
+              </div>
               <a
                 href="${job.apply_url}"
                 target="_blank"
