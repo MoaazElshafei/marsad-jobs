@@ -8,28 +8,17 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    /* أساسيات لمنع الخروج عن الشاشة */
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
     html, body {
-      margin: 0;
-      padding: 0;
-      overflow-x: hidden; /* منع التمرير الأفقي نهائياً */
-      width: 100%;
-      max-width: 100vw;
+      margin: 0; padding: 0;
+      overflow-x: hidden;
+      width: 100%; max-width: 100vw;
     }
-    body { 
-      font-family: 'Cairo', sans-serif; 
-      background-color: #f9fafb;
-    }
+    body { font-family: 'Cairo', sans-serif; background-color: #f9fafb; }
     .line-clamp-2 {
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
+      display: -webkit-box; -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden;
     }
-    /* إخفاء شريط التمرير */
     .scrollbar-hide::-webkit-scrollbar { display: none; }
     .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
@@ -40,7 +29,7 @@
   <header class="bg-[#4c1d95] text-white shadow-md sticky top-0 z-30 w-full">
     <div class="max-w-6xl mx-auto px-3 md:px-4 py-3 w-full">
       
-      <!-- الصف الأول: الشعار وزر لوحة التحكم -->
+      <!-- الصف الأول: الشعار وأزرار التحكم -->
       <div class="flex items-center justify-between gap-2 w-full">
         <div class="flex items-center gap-2 flex-shrink-0">
           <span class="bg-[#d946ef] text-white font-black px-2.5 py-1.5 rounded-lg text-sm md:text-lg shadow flex-shrink-0">
@@ -52,10 +41,17 @@
           </div>
         </div>
         
-        <!-- زر لوحة التحكم -->
-        <a href="admin.html" class="bg-[#7e22ce] hover:bg-[#6b21a8] text-white font-bold px-2.5 py-1.5 rounded-lg text-[10px] md:text-sm transition shadow flex items-center gap-1 whitespace-nowrap flex-shrink-0">
-          ⚙️ <span class="hidden sm:inline">لوحة التحكم</span><span class="sm:hidden">اللوحة</span>
-        </a>
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <!-- زر تواصل معنا -->
+          <button onclick="openContactModal()" class="bg-white/10 hover:bg-white/20 text-white font-bold px-2.5 py-1.5 rounded-lg text-[10px] md:text-sm transition shadow flex items-center gap-1 whitespace-nowrap">
+            ✉️ <span class="hidden sm:inline">تواصل معنا</span>
+          </button>
+          
+          <!-- زر لوحة التحكم -->
+          <a href="admin.html" class="bg-[#7e22ce] hover:bg-[#6b21a8] text-white font-bold px-2.5 py-1.5 rounded-lg text-[10px] md:text-sm transition shadow flex items-center gap-1 whitespace-nowrap">
+            ⚙️ <span class="hidden sm:inline">لوحة التحكم</span><span class="sm:hidden">اللوحة</span>
+          </a>
+        </div>
       </div>
 
       <!-- الصف الثاني: أزرار الدول -->
@@ -99,7 +95,6 @@
           placeholder="ابحث بالمسمى الوظيفي، التخصص، اسم الشركة..."
           class="flex-1 w-full px-3 md:px-4 py-2.5 md:py-3 text-slate-800 rounded-xl focus:outline-none text-xs md:text-base border border-slate-100 text-right"
         />
-        <!-- تم إضافة text-center و text-right هنا لتوسيط كلمة "كل الوظائف" -->
         <select
           id="type-filter"
           onchange="filterJobs()"
@@ -134,7 +129,67 @@
     <p>© 2026 مرصد الوظائف (MarsadJobs) - جميع الحقوق محفوظة</p>
   </footer>
 
+  <!-- ================= نافذة تواصل معنا (Modal) ================= -->
+  <div id="contact-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative">
+      
+      <!-- زر الإغلاق -->
+      <button onclick="closeContactModal()" class="absolute top-3 left-3 text-slate-400 hover:text-red-500 text-2xl font-bold">&times;</button>
+      
+      <div class="p-6">
+        <h3 class="text-xl font-black text-slate-800 mb-1 text-center">تواصل معنا</h3>
+        <p class="text-xs text-slate-500 text-center mb-5">أرسل استفسارك أو اقتراحك وسنرد عليك في أقرب وقت.</p>
+
+        <!-- فورم الإرسال (يرسل مباشرة إلى بريدك) -->
+        <form action="https://formsubmit.co/Moazalbaghdady1@gmail.com" method="POST" class="space-y-3">
+          <!-- إعدادات خفية للفورم -->
+          <input type="hidden" name="_captcha" value="false">
+          <input type="hidden" name="_subject" value="رسالة جديدة من موقع مرصد الوظائف">
+          <input type="hidden" name="_template" value="table">
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">الاسم</label>
+            <input type="text" name="name" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#7e22ce] text-sm" placeholder="اكتب اسمك">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">البريد الإلكتروني</label>
+            <input type="email" name="email" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#7e22ce] text-sm text-left" dir="ltr" placeholder="example@gmail.com">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">الرسالة</label>
+            <textarea name="message" required rows="4" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#7e22ce] text-sm resize-none" placeholder="اكتب رسالتك هنا..."></textarea>
+          </div>
+
+          <button type="submit" class="w-full bg-[#7e22ce] hover:bg-[#4c1d95] text-white font-bold py-2.5 rounded-lg transition shadow-md mt-2">
+            إرسال الرسالة 🚀
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <script>
+    // ================= سكريبت نافذة التواصل =================
+    function openContactModal() {
+      const modal = document.getElementById('contact-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeContactModal() {
+      const modal = document.getElementById('contact-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // إغلاق النافذة عند الضغط خارجها
+    document.getElementById('contact-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeContactModal();
+    });
+
+    // ================= سكريبت الوظائف =================
     const SUPABASE_URL = 'https://hsomjtpoqmtymuvzymik.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_MJC4wJAIVMs1O-c0H89qag_ivW0BoUm';
 
@@ -239,7 +294,6 @@
       }
 
       container.innerHTML = filtered.map(job => {
-        // تغيير لغة التاريخ إلى الإنجليزية
         const dateStr = job.published_at ? new Date(job.published_at).toLocaleDateString('en-GB') : 'Recently';
         const viewsCount = job.views || 0;
         
@@ -268,10 +322,7 @@
               </p>
             </div>
             
-            <!-- الفوتر الخاص بالكرت: التاريخ يسار، المصدر وسط، المشاهدات يمين -->
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-3 border-t border-slate-100 gap-3 w-full">
-              
-              <!-- تم استخدام justify-between هنا لتوزيع العناصر بالتناسق المطلوب -->
               <div class="flex items-center justify-between w-full text-[10px] md:text-xs text-slate-500 font-medium px-2" dir="ltr">
                 <span class="flex items-center gap-1">📅 ${dateStr}</span>
                 <span class="flex items-center gap-1">🔗 ${job.source}</span>
