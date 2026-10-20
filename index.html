@@ -66,13 +66,13 @@
         <input
           id="search-input"
           type="text"
-          oninput="filterJobs()"
+          oninput="currentPage=1;filterJobs()"
           placeholder="ابحث بالمسمى الوظيفي، التخصص، اسم الشركة، أو المدينة..."
           class="flex-1 px-4 py-3 text-slate-800 rounded-xl focus:outline-none text-sm md:text-base"
         />
         <select
           id="type-filter"
-          onchange="filterJobs()"
+          onchange="currentPage=1;filterJobs()"
           class="bg-slate-100 text-slate-700 px-4 py-3 rounded-xl font-semibold text-sm text-center focus:outline-none cursor-pointer [text-align-last:center]"
         >
           <option value="الكل">كل الوظائف</option>
@@ -96,6 +96,7 @@
 
     <!-- حاوية البطاقات -->
     <div id="jobs-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    <div id="pagination" class="flex justify-center items-center flex-wrap gap-2 mt-8"></div>
   </main>
 
   <!-- الفوتر -->
@@ -141,6 +142,8 @@
     let allJobs = [];
     let currentCountry = 'EG';
     let currentCategory = 'الكل';
+    let currentPage = 1;
+    const PER_PAGE = 20;
 
     function renderCategories() {
       const bar = document.getElementById('category-bar');
@@ -160,12 +163,14 @@
 
     function selectCategory(cat) {
       currentCategory = cat;
+      currentPage = 1;
       renderCategories();
       filterJobs();
     }
 
     function selectCountry(code) {
       currentCountry = code;
+      currentPage = 1;
       loadJobsFromDB();
     }
 
@@ -200,6 +205,34 @@
       filterJobs();
     }
 
+    function goToPage(p) {
+      currentPage = p;
+      filterJobs();
+      document.getElementById('jobs-count').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function renderPagination(totalPages) {
+      const box = document.getElementById('pagination');
+      if (totalPages <= 1) { box.innerHTML = ''; return; }
+      const btn = (label, page, active, disabled) => `
+        <button onclick="goToPage(${page})" ${disabled ? 'disabled' : ''}
+          class="min-w-[40px] px-3 py-2 rounded-lg text-sm font-bold transition border ${
+            active ? 'bg-[#4c1d95] text-white border-[#4c1d95]'
+            : 'bg-white text-slate-600 border-slate-200 hover:bg-purple-50'
+          } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}">${label}</button>`;
+      let html = btn('السابق', currentPage - 1, false, currentPage === 1);
+      let last = 0;
+      for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 1) {
+          if (last && i - last > 1) html += '<span class="px-1 text-slate-400">…</span>';
+          html += btn(i, i, i === currentPage, false);
+          last = i;
+        }
+      }
+      html += btn('التالي', currentPage + 1, false, currentPage === totalPages);
+      box.innerHTML = html;
+    }
+
     function filterJobs() {
       const query = document.getElementById('search-input').value.toLowerCase();
       const typeFilter = document.getElementById('type-filter').value;
@@ -219,6 +252,7 @@
       countEl.textContent = `تم رصد ${filtered.length} فرصة عمل متاحة`;
 
       if (filtered.length === 0) {
+        document.getElementById('pagination').innerHTML = '';
         container.innerHTML = `
           <div class="col-span-full bg-white rounded-2xl p-12 text-center border border-slate-200">
             <p class="text-lg font-bold text-slate-700">لا توجد وظائف مطابقة لهذا الفلتر حالياً</p>
@@ -228,7 +262,12 @@
         return;
       }
 
-      container.innerHTML = filtered.map(job => {
+      const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
+      if (currentPage > totalPages) currentPage = totalPages;
+      const pageItems = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
+      renderPagination(totalPages);
+
+      container.innerHTML = pageItems.map(job => {
         const dateStr = job.published_at ? new Date(job.published_at).toLocaleDateString('en-GB') : 'حديثاً';
         return `
           <div class="bg-white p-5 rounded-2xl border border-slate-200 hover:border-[#a855f7] hover:shadow-lg transition flex flex-col justify-between">
