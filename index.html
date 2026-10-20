@@ -117,6 +117,7 @@
       <a href="terms.html" class="underline hover:text-white">شروط الاستخدام</a>
       <a href="#contact" class="underline hover:text-white">تواصل معنا</a>
     </p>
+    <p class="mb-2">👁 إجمالي الزيارات: <span id="site-visits" class="font-bold text-white">—</span></p>
     <p>© 2026 Yallahired - جميع الحقوق محفوظة | يعمل بنظام الرصد التلقائي الذكي</p>
   </footer>
 
@@ -288,7 +289,7 @@
               </p>
             </div>
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t border-slate-100 mt-2">
-              <div dir="ltr" class="flex items-center gap-4 flex-wrap text-xs text-slate-400">
+              <div dir="ltr" class="flex items-center justify-between gap-4 flex-1 text-xs text-slate-400">
                 <span>📅 ${dateStr}</span>
                 <span>👁 <span id="views-${job.id}">${job.views || 0}</span> views</span>
               </div>
@@ -353,8 +354,15 @@
 
     document.getElementById('contact-form').addEventListener('submit', submitContact);
 
+    async function loadSiteVisits() {
+      try {
+        const { data, error } = await supabaseClient.from('site_stats').select('visits').eq('id', 1).maybeSingle();
+        if (!error && data) document.getElementById('site-visits').textContent = data.visits;
+      } catch (e) {}
+    }
+
     renderCategories();
-    countSiteVisit();
+    countSiteVisit().then(loadSiteVisits);
     loadJobsFromDB();
   </script>
 </body>
