@@ -54,9 +54,9 @@
         <h3 class="text-lg font-extrabold text-[#4c1d95] mb-1">أنا أبحث عن وظيفة</h3>
         <p class="text-sm text-slate-500 mb-5">ارفع سيرتك الذاتية وهتوصلنا على الإيميل، ونعرّفك بالفرص المناسبة لك.</p>
         <form class="service-form space-y-3 mt-auto" data-kind="cv">
-          <input type="text" name="name" required placeholder="الاسم" class="w-full px-4 py-3 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#a855f7]">
-          <input type="email" name="email" required placeholder="بريدك الإلكتروني" dir="ltr" class="w-full px-4 py-3 border border-slate-300 rounded-xl text-sm text-left focus:outline-none focus:border-[#a855f7]">
-          <input type="text" name="job_interest" placeholder="الوظيفة التي تبحث عنها (اختياري)" class="w-full px-4 py-3 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#a855f7]">
+          <input type="text" name="name" required placeholder="الاسم" class="w-full px-4 py-3 border border-slate-300 rounded-xl text-sm text-center focus:outline-none focus:border-[#a855f7]">
+          <input type="email" name="email" required placeholder="بريدك الإلكتروني" dir="ltr" class="w-full px-4 py-3 border border-slate-300 rounded-xl text-sm text-center focus:outline-none focus:border-[#a855f7]">
+          <input type="text" name="job_interest" placeholder="الوظيفة التي تبحث عنها (اختياري)" class="w-full px-4 py-3 border border-slate-300 rounded-xl text-sm text-center focus:outline-none focus:border-[#a855f7]">
           <label class="block text-xs font-bold text-slate-600">السيرة الذاتية (PDF أو Word، حد أقصى 5 ميجا)
             <input type="file" name="cv" required accept=".pdf,.doc,.docx" class="mt-1 block w-full text-sm text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-50 file:text-[#6b21a8] file:font-bold">
           </label>
@@ -73,11 +73,11 @@
         <h3 class="text-lg font-extrabold text-[#4c1d95] mb-1">أنا شركة أبحث عن موظف</h3>
         <p class="text-sm text-slate-500 mb-5">قولنا المسمى الوظيفي والمواصفات، وهنوفر لك المرشحين المناسبين.</p>
         <form class="service-form space-y-3 mt-auto">
-          <input type="text" name="company" required placeholder="اسم الشركة" class="w-full px-4 py-3 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#a855f7]">
-          <input type="text" name="name" required placeholder="اسم المسؤول" class="w-full px-4 py-3 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#a855f7]">
-          <input type="email" name="email" required placeholder="البريد الإلكتروني" dir="ltr" class="w-full px-4 py-3 border border-slate-300 rounded-xl text-sm text-left focus:outline-none focus:border-[#a855f7]">
-          <input type="tel" name="phone" placeholder="رقم الموبايل (اختياري)" dir="ltr" class="w-full px-4 py-3 border border-slate-300 rounded-xl text-sm text-left focus:outline-none focus:border-[#a855f7]">
-          <textarea name="details" required rows="3" placeholder="المسمى الوظيفي والمواصفات المطلوبة" class="w-full px-4 py-3 border border-slate-300 rounded-xl text-sm resize-none focus:outline-none focus:border-[#a855f7]"></textarea>
+          <input type="text" name="company" required placeholder="اسم الشركة" class="w-full px-4 py-3 border border-slate-300 rounded-xl text-sm text-center focus:outline-none focus:border-[#a855f7]">
+          <input type="text" name="name" required placeholder="اسم المسؤول" class="w-full px-4 py-3 border border-slate-300 rounded-xl text-sm text-center focus:outline-none focus:border-[#a855f7]">
+          <input type="email" name="email" required placeholder="البريد الإلكتروني" dir="ltr" class="w-full px-4 py-3 border border-slate-300 rounded-xl text-sm text-center focus:outline-none focus:border-[#a855f7]">
+          <input type="tel" name="phone" placeholder="رقم الموبايل (اختياري)" dir="ltr" class="w-full px-4 py-3 border border-slate-300 rounded-xl text-sm text-center focus:outline-none focus:border-[#a855f7]">
+          <textarea name="details" required rows="3" placeholder="المسمى الوظيفي والمواصفات المطلوبة" class="w-full px-4 py-3 border border-slate-300 rounded-xl text-sm text-center resize-none focus:outline-none focus:border-[#a855f7]"></textarea>
           <input type="hidden" name="_subject" value="طلب موظف من شركة">
           <input type="text" name="_gotcha" class="hidden" tabindex="-1" autocomplete="off">
           <button type="submit" class="w-full bg-[#7e22ce] hover:bg-[#6b21a8] text-white font-bold py-3 rounded-xl transition shadow">اطلب موظف</button>
@@ -425,6 +425,18 @@
         file_name: file.name
       });
       if (ins.error) throw ins.error;
+
+      // إشعار بالإيميل بدون الملف (الملف محفوظ في لوحة التحكم)
+      try {
+        const notify = new FormData();
+        notify.append('_subject', 'سيرة ذاتية جديدة على الموقع');
+        notify.append('الاسم', fd.get('name'));
+        notify.append('البريد', fd.get('email'));
+        notify.append('الوظيفة المطلوبة', fd.get('job_interest') || '—');
+        notify.append('اسم الملف', file.name);
+        notify.append('ملاحظة', 'الملف محفوظ في لوحة التحكم ضمن طلبات السير الذاتية');
+        await fetch('https://formspree.io/f/xwlvjzov', { method: 'POST', headers: { 'Accept': 'application/json' }, body: notify });
+      } catch (e) {}
     }
 
     async function submitService(e) {
