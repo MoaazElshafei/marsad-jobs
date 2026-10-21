@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.yallahired.twa",
+        "sha256_cert_fingerprints": ["2C:E3:2D:EE:0F:1C:76:F8:ED:29:D2:93:85:13:B5:A2:40:EB:81:93:A9:37:F8:B9:4D:AA:AF:AC:19:42:E9:F3"]
+      }
+    }]
