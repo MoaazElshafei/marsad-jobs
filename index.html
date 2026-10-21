@@ -4,6 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Yallahired - وظائف مصر والوطن العربي</title>
+  <meta name="description" content="رصد آلي لأحدث الوظائف في مصر والوطن العربي" />
+  <meta name="theme-color" content="#4c1d95" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -168,6 +173,10 @@
     <p class="mb-2">👁 إجمالي الزيارات: <span id="site-visits" class="font-bold text-white">—</span></p>
     <p>© 2026 Yallahired - جميع الحقوق محفوظة | يعمل بنظام الرصد التلقائي الذكي</p>
   </footer>
+
+  <script>
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  </script>
 
   <script>
     // إعدادات الاتصال الآمن بقاعدة البيانات
