@@ -161,6 +161,28 @@
         </div>
       </div>
 
+      <!-- ================= طلبات السير الذاتية ================= -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mt-8">
+        <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+          <h2 class="text-sm md:text-base font-bold text-slate-800 flex items-center gap-2">📄 طلبات السير الذاتية</h2>
+          <span id="cv-count" class="text-xs font-bold text-slate-500"></span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-right text-xs md:text-sm whitespace-nowrap min-w-[700px]">
+            <thead class="bg-white text-slate-500 border-b border-slate-100">
+              <tr>
+                <th class="py-3 px-4 font-bold">الاسم</th>
+                <th class="py-3 px-4 font-bold">البريد</th>
+                <th class="py-3 px-4 font-bold">الوظيفة المطلوبة</th>
+                <th class="py-3 px-4 font-bold">التاريخ</th>
+                <th class="py-3 px-4 font-bold text-center">الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="cv-table-body" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+
     </main>
 
     <footer class="text-center py-6 text-xs text-slate-400">
@@ -276,6 +298,7 @@
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('dashboard-content').style.display = 'flex';
       loadDashboardData();
+      loadCvApplications();
     }
 
     async function logout() {
@@ -502,6 +525,53 @@
       } else {
         loadDashboardData(); // إعادة تحميل الجدول
       }
+    }
+
+    // ==========================================
+    // 4. طلبات السير الذاتية
+    // ==========================================
+    function escapeHtml(str) {
+      return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    async function loadCvApplications() {
+      const body = document.getElementById('cv-table-body');
+      const { data, error } = await supabaseClient.from('cv_applications').select('*').order('created_at', { ascending: false });
+      if (error) {
+        body.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-red-600 font-bold">تعذر تحميل الطلبات: ${escapeHtml(error.message)}</td></tr>`;
+        return;
+      }
+      document.getElementById('cv-count').textContent = `${data.length} طلب`;
+      if (!data.length) {
+        body.innerHTML = '<tr><td colspan="5" class="py-6 text-center text-slate-400 font-bold">لا توجد طلبات حتى الآن</td></tr>';
+        return;
+      }
+      body.innerHTML = data.map(r => `
+        <tr class="hover:bg-slate-50">
+          <td class="py-3 px-4 font-bold text-slate-800">${escapeHtml(r.name)}</td>
+          <td class="py-3 px-4 text-left" dir="ltr">${escapeHtml(r.email)}</td>
+          <td class="py-3 px-4 text-slate-600">${escapeHtml(r.job_interest || '—')}</td>
+          <td class="py-3 px-4 text-slate-500" dir="ltr">${new Date(r.created_at).toLocaleDateString('en-GB')}</td>
+          <td class="py-3 px-4 text-center">
+            <button onclick="downloadCv('${r.file_path}')" class="text-purple-700 hover:underline font-bold mx-2">تحميل</button>
+            <button onclick="deleteCv('${r.id}', '${r.file_path}')" class="text-red-600 hover:underline font-bold mx-2">حذف</button>
+          </td>
+        </tr>`).join('');
+    }
+
+    async function downloadCv(path) {
+      const { data, error } = await supabaseClient.storage.from('cvs').createSignedUrl(path, 600);
+      if (error) { alert('تعذر فتح الملف: ' + error.message); return; }
+      window.open(data.signedUrl, '_blank', 'noopener');
+    }
+
+    async function deleteCv(id, path) {
+      if (!confirm('هل تريد حذف هذه السيرة الذاتية نهائياً؟')) return;
+      const { error: fileErr } = await supabaseClient.storage.from('cvs').remove([path]);
+      if (fileErr) { alert('حدث خطأ أثناء حذف الملف: ' + fileErr.message); return; }
+      const { error } = await supabaseClient.from('cv_applications').delete().eq('id', id);
+      if (error) alert('حدث خطأ أثناء الحذف: ' + error.message);
+      loadCvApplications();
     }
 
   </script>
